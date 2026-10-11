@@ -21,6 +21,7 @@ function $$(sel, root) {
 function save() {
   var ok = Storage.save(state);
   if (!ok) toast('Gagal menyimpan. Penyimpanan browser mungkin penuh.', 'err');
+  if (typeof Cloud !== 'undefined') Cloud.schedulePush();
   return ok;
 }
 
@@ -174,6 +175,13 @@ var ROUTES = {
 };
 
 function route() {
+  if (typeof Cloud !== 'undefined' && Cloud.needLogin()) {
+    Cloud.renderAuth();
+    window.scrollTo(0, 0);
+    if (window.innerWidth <= 860) $('#sidebar').classList.remove('open');
+    return;
+  }
+
   var hash = (location.hash || '').replace('#/', '').split('?')[0];
   if (!ROUTES[hash]) hash = 'dashboard';
   currentRoute = hash;
@@ -203,6 +211,9 @@ function renderSidebarSummary() {
     return '<div class="row"><span>' + esc(r.label) + '</span>' +
       '<b class="' + (r.cls || '') + '">' + esc(r.value) + '</b></div>';
   }).join('');
+  if (typeof Cloud !== 'undefined') {
+    $('#accountBox').innerHTML = Cloud.accountHtml();
+  }
 }
 
 /* =========================================================
@@ -767,38 +778,59 @@ function openTradeModal(id) {
       return;
     }
 
-    var isOpen = $('#tStatus').value === 'open';
-    var data = {
-      symbol: symbol,
-      market: $('#tMarket').value,
-      side: $('#tSide').value,
-      status: isOpen ? 'open' : 'closed',
-      entryDate: $('#tEntryDate').value,
-      exitDate: isOpen ? '' : $('#tExitDate').value,
-      entryPrice: $('#tEntryPrice').value,
-      exitPrice: isOpen ? '' : $('#tExitPrice').value,
-      sl: $('#tSL').value,
-      tp: $('#tTP').value,
-      lot: $('#tLot').value,
-      pips: $('#tPips').value,
-      risk: $('#tRisk').value,
-      pnl: isOpen ? 0 : $('#tPnl').value,
-      setupId: $('#tSetup').value,
-      tags: $('#tTags').value.split(',').map(function (s) { return s.trim(); })
-        .filter(Boolean),
-      quality: $('#tQuality').value,
-      mood: $('#tMood').value,
-      disciplined: $('#tDisciplined').value === 'ya',
-      notes: $('#tNotes').value.trim(),
-      screenshot: pendingShot
+    var btn = $('#saveTrade');
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+
+    var newId = t ? t.id : uid('tr');
+
+    var finish = function () {
+      var isOpen = $('#tStatus').value === 'open';
+      var data = {
+        id: newId,
+        symbol: symbol,
+        market: $('#tMarket').value,
+        side: $('#tSide').value,
+        status: isOpen ? 'open' : 'closed',
+        entryDate: $('#tEntryDate').value,
+        exitDate: isOpen ? '' : $('#tExitDate').value,
+        entryPrice: $('#tEntryPrice').value,
+        exitPrice: isOpen ? '' : $('#tExitPrice').value,
+        sl: $('#tSL').value,
+        tp: $('#tTP').value,
+        lot: $('#tLot').value,
+        pips: $('#tPips').value,
+        risk: $('#tRisk').value,
+        pnl: isOpen ? 0 : $('#tPnl').value,
+        setupId: $('#tSetup').value,
+        tags: $('#tTags').value.split(',').map(function (s) { return s.trim(); })
+          .filter(Boolean),
+        quality: $('#tQuality').value,
+        mood: $('#tMood').value,
+        disciplined: $('#tDisciplined').value === 'ya',
+        notes: $('#tNotes').value.trim(),
+        screenshot: pendingShot
+      };
+
+      if (t) TradeStore.update(state, t.id, data);
+      else TradeStore.add(state, data);
+
+      closeModal();
+      refresh();
+      toast(t ? 'Trade diperbarui' : 'Trade tersimpan', 'ok');
     };
 
-    if (t) TradeStore.update(state, t.id, data);
-    else TradeStore.add(state, data);
-
-    closeModal();
-    refresh();
-    toast(t ? 'Trade diperbarui' : 'Trade tersimpan', 'ok');
+    // Mode cloud: unggah screenshot ke Storage dulu agar tersinkron.
+    if (typeof Cloud !== 'undefined' && Cloud.configured() && Cloud.user &&
+        pendingShot && pendingShot.indexOf('data:') === 0) {
+      Cloud.uploadShot(pendingShot, newId).then(function (url) {
+        if (url) pendingShot = url;
+        else toast('Screenshot gagal diunggah, tersimpan lokal saja', 'err');
+        finish();
+      });
+    } else {
+      finish();
+    }
   });
 
   if (t) {
@@ -1606,7 +1638,9 @@ function renderSettings() {
     '</div>' +
     '</div>';
 
-  html += '<div class="card">' +
+  html += '<div class="card" style="margin-top:16px" id="accountCard"></div>';
+
+  html += '<div class="card" style="margin-top:16px">' +
     '<div class="card-head"><h2>Cadangan dan Pemulihan</h2></div>' +
     '<div class="grid g-3">' +
       '<div>' +
@@ -1640,6 +1674,13 @@ function renderSettings() {
     '</div>';
 
   $('#view').innerHTML = html;
+
+  if (typeof Cloud !== 'undefined') {
+    $('#accountCard').innerHTML = Cloud.settingsHtml();
+    Cloud.bindSettings();
+  } else {
+    $('#accountCard').style.display = 'none';
+  }
 
   $('#saveSettings').addEventListener('click', function () {
     set.initialCapital = Math.max(0, Number($('#setCapital').value) || 0);
@@ -1715,4 +1756,5 @@ $('#menuBtn').addEventListener('click', function () {
 window.addEventListener('hashchange', route);
 
 if (!location.hash) location.hash = '#/dashboard';
-route();
+if (typeof Cloud !== 'undefined') Cloud.boot(function () { route(); });
+else route();
