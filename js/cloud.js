@@ -112,25 +112,42 @@ Cloud.renderAuth = function () {
   $$('#nav a').forEach(function (a) { a.classList.remove('active'); });
 
   var html =
-    '<div style="max-width:420px;margin:48px auto">' +
-      '<div class="card">' +
-        '<div class="card-head"><h2>Jurnal Trading</h2></div>' +
-        '<p class="muted small" style="margin-top:0">Masuk dengan email untuk membuka ' +
-        'jurnal yang tersinkron di semua perangkat.</p>' +
-        '<div class="tabs">' +
-          '<button class="tab' + (authMode === 'in' ? ' active' : '') + '" id="tabIn" type="button">Masuk</button>' +
-          '<button class="tab' + (authMode === 'up' ? ' active' : '') + '" id="tabUp" type="button">Daftar</button>' +
+    '<div class="auth-page">' +
+      '<div class="auth-grid">' +
+        '<div class="auth-brand">' +
+          '<div class="auth-logo">JT</div>' +
+          '<h2>Jurnal Trading</h2>' +
+          '<p>Catatan dan evaluasi transaksi yang tersinkron di semua perangkat kamu.</p>' +
+          '<ul class="auth-feats">' +
+            '<li><span class="fdot"></span><div><b>Dashboard performa</b><span>Win rate, profit factor, equity curve</span></div></li>' +
+            '<li><span class="fdot"></span><div><b>Kalender dan analitik</b><span>Heatmap harian dan laporan per setup</span></div></li>' +
+            '<li><span class="fdot"></span><div><b>Playbook dan risk plan</b><span>Checklist pre-trade dan batas risiko</span></div></li>' +
+          '</ul>' +
+          '<div class="auth-secure">Data terisolasi per akun dan diamankan Row Level Security</div>' +
         '</div>' +
-        '<div id="authErr"></div>' +
-        '<div class="field"><label>Email</label>' +
-          '<input type="text" id="authEmail" placeholder="nama@email.com" autocomplete="email"></div>' +
-        '<div class="field"><label>Kata sandi (min. 6 karakter)</label>' +
-          '<input type="password" id="authPass" placeholder="Kata sandi" autocomplete="current-password"></div>' +
-        '<button class="btn btn-primary" id="authGo" type="button" style="width:100%">' +
-          (authMode === 'in' ? 'Masuk' : 'Daftar Akun') + '</button>' +
-        '<div id="authInfo" style="margin-top:12px"></div>' +
-        '<p class="muted small" style="margin:14px 0 0;text-align:center">' +
-          '<a href="#" id="authLocal">Lanjut tanpa akun (mode lokal)</a></p>' +
+        '<div class="auth-form-side">' +
+          '<div class="auth-card">' +
+            '<h2>' + (authMode === 'in' ? 'Selamat datang kembali' : 'Buat akun baru') + '</h2>' +
+            '<p class="muted small" style="margin-top:0">' +
+              (authMode === 'in'
+                ? 'Masuk untuk membuka jurnal kamu.'
+                : 'Satu akun untuk semua perangkat.') + '</p>' +
+            '<div class="auth-tabs">' +
+              '<button class="atab' + (authMode === 'in' ? ' active' : '') + '" id="tabIn" type="button">Masuk</button>' +
+              '<button class="atab' + (authMode === 'up' ? ' active' : '') + '" id="tabUp" type="button">Daftar</button>' +
+            '</div>' +
+            '<div id="authErr"></div>' +
+            '<div class="field"><label>Email</label>' +
+              '<input type="text" id="authEmail" placeholder="nama@email.com" autocomplete="email"></div>' +
+            '<div class="field"><label>Kata sandi (min. 6 karakter)</label>' +
+              '<input type="password" id="authPass" placeholder="Kata sandi" autocomplete="current-password"></div>' +
+            '<button class="btn btn-primary btn-lg btn-block" id="authGo" type="button">' +
+              (authMode === 'in' ? 'Masuk ke Jurnal' : 'Daftar Akun') + '</button>' +
+            '<div id="authInfo" style="margin-top:12px"></div>' +
+            '<div class="auth-alt"><span>atau</span></div>' +
+            '<button class="btn btn-ghost btn-block" id="authLocal" type="button">Lanjut tanpa akun (mode lokal)</button>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
     '</div>';
 
