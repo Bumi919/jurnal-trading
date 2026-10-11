@@ -291,6 +291,7 @@ h3 { font-size: 13.5px; margin: 0 0 8px; font-weight: 650; }
 }
 
 input[type="text"],
+input[type="password"],
 input[type="number"],
 input[type="date"],
 input[type="datetime-local"],
@@ -313,6 +314,31 @@ input:focus, select:focus, textarea:focus {
 }
 textarea { resize: vertical; min-height: 76px; line-height: 1.5; }
 select { cursor: pointer; }
+
+/* ---------- Kolom kata sandi + tombol intip ---------- */
+
+.pass-wrap { position: relative; }
+.pass-wrap input { padding-right: 44px; }
+.pass-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  color: var(--text-2);
+  cursor: pointer;
+  padding: 0;
+}
+.pass-toggle:hover { color: var(--text); background: var(--panel-2); }
+.pass-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.pass-toggle svg { width: 19px; height: 19px; }
 
 .form-row {
   display: grid;

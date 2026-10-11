@@ -140,7 +140,13 @@ Cloud.renderAuth = function () {
             '<div class="field"><label>Email</label>' +
               '<input type="text" id="authEmail" placeholder="nama@email.com" autocomplete="email"></div>' +
             '<div class="field"><label>Kata sandi (min. 6 karakter)</label>' +
-              '<input type="password" id="authPass" placeholder="Kata sandi" autocomplete="current-password"></div>' +
+              '<div class="pass-wrap">' +
+                '<input type="password" id="authPass" placeholder="Kata sandi" autocomplete="current-password">' +
+                '<button class="pass-toggle" id="passToggle" type="button" ' +
+                  'title="Tampilkan kata sandi" aria-label="Tampilkan kata sandi">' +
+                  Cloud.eyeSvg(false) +
+                '</button>' +
+              '</div></div>' +
             '<button class="btn btn-primary btn-lg btn-block" id="authGo" type="button">' +
               (authMode === 'in' ? 'Masuk ke Jurnal' : 'Daftar Akun') + '</button>' +
             '<div id="authInfo" style="margin-top:12px"></div>' +
@@ -212,12 +218,35 @@ Cloud.renderAuth = function () {
     if (e.key === 'Enter') { e.preventDefault(); submit(); }
   });
 
+  $('#passToggle').addEventListener('click', function () {
+    var input = $('#authPass');
+    var show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    this.innerHTML = Cloud.eyeSvg(show);
+    var label = show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi';
+    this.title = label;
+    this.setAttribute('aria-label', label);
+    input.focus();
+  });
+
   $('#authLocal').addEventListener('click', function (e) {
     e.preventDefault();
     Cloud.localOnly = true;
     if (!location.hash || location.hash === '#/dashboard') route();
     else location.hash = '#/dashboard';
   });
+};
+
+Cloud.eyeSvg = function (open) {
+  var body = open
+    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>' +
+      '<circle cx="12" cy="12" r="3"/>'
+    : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 ' +
+      '18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 ' +
+      '8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>' +
+      '<line x1="1" y1="1" x2="23" y2="23"/>';
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + body + '</svg>';
 };
 
 Cloud.friendlyError = function (err) {
