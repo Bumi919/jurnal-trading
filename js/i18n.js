@@ -442,5 +442,15 @@ var STR = { en: {
 'Kualitas': 'Quality',
 'Disiplin': 'Discipline',
 'Catatan': 'Notes',
-'Belum ada data untuk ditampilkan': 'No data to display'
+'Belum ada data untuk ditampilkan': 'No data to display',
+'Install Aplikasi': 'Install App',
+'Aplikasi sudah terinstal dan berjalan mode aplikasi.': 'The app is installed and running in app mode.',
+'Pasang sebagai aplikasi di layar utama HP agar terbuka fullscreen dan bisa offline.': 'Install it on your phone home screen to open fullscreen and work offline.',
+'Perangkat ini mendukung instalasi langsung.': 'This device supports direct install.',
+'Install Sekarang': 'Install Now',
+'Aplikasi terinstal. Buka dari layar utama.': 'App installed. Open it from the home screen.',
+'Instalasi dibatalkan.': 'Install dismissed.',
+'Cara manual:': 'Manual way:',
+'Android Chrome: menu titik tiga → Install aplikasi / Add to Home Screen.': 'Android Chrome: three-dot menu → Install app / Add to Home Screen.',
+'iPhone Safari: tombol Share → Add to Home Screen.': 'iPhone Safari: Share button → Add to Home Screen.'
 } };

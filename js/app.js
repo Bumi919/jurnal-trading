@@ -1634,6 +1634,8 @@ function renderSettings() {
 
   html += '<div class="card" style="margin-top:16px" id="accountCard"></div>';
 
+  html += '<div class="card" style="margin-top:16px" id="installCard"></div>';
+
   html += '<div class="card" style="margin-top:16px">' +
     '<div class="card-head"><h2>' + t('Cadangan dan Pemulihan') + '</h2></div>' +
     '<div class="grid g-3">' +
@@ -1675,6 +1677,7 @@ function renderSettings() {
   } else {
     $('#accountCard').style.display = 'none';
   }
+  refreshInstallCard();
 
   $('#saveSettings').addEventListener('click', function () {
     set.initialCapital = Math.max(0, Number($('#setCapital').value) || 0);
@@ -1776,6 +1779,78 @@ $('#quickAdd').addEventListener('click', function () { openTradeModal(); });
 $('#langSel').addEventListener('change', function () {
   if (this.value !== getLang()) setLang(this.value);
 });
+
+/* ---------- PWA: service worker + prompt instalasi ---------- */
+
+var deferredInstall = null;
+
+window.addEventListener('beforeinstallprompt', function (e) {
+  e.preventDefault();
+  deferredInstall = e;
+  refreshInstallCard();
+});
+
+window.addEventListener('appinstalled', function () {
+  deferredInstall = null;
+  toast(t('Aplikasi terinstal. Buka dari layar utama.'));
+  refreshInstallCard();
+});
+
+if ('serviceWorker' in navigator &&
+    (location.protocol === 'https:' ||
+     location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () { /* abaikan */ });
+  });
+}
+
+function isStandalone() {
+  return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+    window.navigator.standalone === true;
+}
+
+function installCardHtml() {
+  var html = '<div class="card-head"><h2>' + t('Install Aplikasi') + '</h2></div>';
+  if (isStandalone()) {
+    return html + '<p class="muted small" style="margin:0">' +
+      t('Aplikasi sudah terinstal dan berjalan mode aplikasi.') + '</p>';
+  }
+  html += '<p class="muted small" style="margin-top:0">' +
+    t('Pasang sebagai aplikasi di layar utama HP agar terbuka fullscreen dan bisa offline.') + '</p>';
+  if (deferredInstall) {
+    html += '<p class="small" style="margin-top:0">' +
+      t('Perangkat ini mendukung instalasi langsung.') + '</p>' +
+      '<button class="btn btn-primary" id="installNow" type="button">' +
+      t('Install Sekarang') + '</button>';
+  } else {
+    html += '<p class="muted small" style="margin:0">' + t('Cara manual:') + '<br>' +
+      t('Android Chrome: menu titik tiga → Install aplikasi / Add to Home Screen.') + '<br>' +
+      t('iPhone Safari: tombol Share → Add to Home Screen.') + '</p>';
+  }
+  return html;
+}
+
+function refreshInstallCard() {
+  var el = $('#installCard');
+  if (!el) return;
+  el.innerHTML = installCardHtml();
+  var btn = $('#installNow');
+  if (btn && deferredInstall) btn.addEventListener('click', function () {
+    btn.disabled = true;
+    deferredInstall.prompt();
+    deferredInstall.userChoice.then(function (choice) {
+      if (choice && choice.outcome === 'accepted') deferredInstall = null;
+      else {
+        btn.disabled = false;
+        toast(t('Instalasi dibatalkan.'));
+      }
+      refreshInstallCard();
+    }).catch(function () {
+      btn.disabled = false;
+      refreshInstallCard();
+    });
+  });
+}
 
 $('#menuBtn').addEventListener('click', function () {
   $('#sidebar').classList.toggle('open');

@@ -45,6 +45,29 @@ jurnal-trading/
 Tanpa konfigurasi: data tersimpan di `localStorage` browser (key `jurnal_trading_v1`).
 Lakukan export JSON berkala dari halaman Pengaturan sebagai cadangan.
 
+## Install sebagai aplikasi Android (PWA)
+
+Aplikasi ini adalah PWA: bisa dipasang dari browser HP tanpa Play Store.
+
+1. Buka URL aplikasi di Chrome HP (`https://trading-journal-bumi.vercel.app/`).
+2. Ketuk menu titik tiga → **Install aplikasi** (atau buka halaman
+   Pengaturan → kartu Install Aplikasi → Install Sekarang bila tersedia).
+3. Ikon JT muncul di layar utama; aplikasi terbuka fullscreen dan
+   bisa dibuka offline (data cloud tetap butuh internet untuk sinkron).
+
+Catatan: tombol Install Sekarang hanya muncul bila browser
+mendukungnya; bila tidak ada, pakai cara manual di kartu yang sama.
+
+## Membuat berkas APK (opsional)
+
+Untuk APK sungguhan (misal dibagikan langsung sebagai file):
+
+1. Pastikan PWA di atas sudah live dan bisa di-install dari browser.
+2. Buka `https://www.pwabuilder.com/`, masukkan URL aplikasi,
+   ikuti validasi, lalu unduh paket **Android (APK/AAB)**.
+3. APK dari jalur ini perlu izin "install dari sumber tak dikenal"
+   di HP; untuk distribusi resmi perlu akun Play Store ($25 sekali bayar).
+
 ## Login email + sinkronisasi cloud (Supabase)
 
 1. Buat project gratis di supabase.com.

@@ -836,7 +836,18 @@ input[type="file"]::file-selector-button {
 @media (max-width: 560px) {
   .g-2, .g-3, .g-4, .g-6 { grid-template-columns: 1fr; }
   .stat .value { font-size: 19px; }
-  .topbar { padding: 12px 14px; }
+  .topbar { padding: 10px 12px; gap: 8px; }
+  .topbar h1 { font-size: 15px; }
+  #quickAdd { padding: 7px 10px; font-size: 12px; }
+  .lang-sel { padding: 6px 6px; font-size: 11.5px; max-width: 96px; }
+  .cal-cell { min-height: 60px; padding: 4px; }
+  .cal-cell .pnl { font-size: 11px; }
+  .cal-cell .cnt { font-size: 10px; }
+  .modal-overlay { padding: 12px 8px; align-items: flex-start; }
+  .modal-foot { flex-wrap: wrap; }
+  .card { padding: 13px; }
+  .view { padding: 12px; }
+  th, td { padding: 7px 9px; font-size: 12.5px; }
 }
 
 @media print {
