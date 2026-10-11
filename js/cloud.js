@@ -57,6 +57,9 @@ Cloud.boot = function (done) {
       Cloud.pullNow(function () { route(); });
     } else if (event === 'SIGNED_OUT') {
       Cloud.user = null;
+      if (Cloud.pushTimer) { clearTimeout(Cloud.pushTimer); Cloud.pushTimer = null; }
+      Cloud.pushing = false;
+      Cloud.pushQueued = false;
       route();
     }
   });
@@ -436,7 +439,11 @@ Cloud.pullNow = function (cb) {
 Cloud.schedulePush = function () {
   if (!Cloud.configured() || !Cloud.user || Cloud.syncing) return;
   if (Cloud.pushTimer) clearTimeout(Cloud.pushTimer);
-  Cloud.pushTimer = setTimeout(function () { Cloud.pushNow(); }, 2000);
+  Cloud.pushTimer = setTimeout(function () {
+    Cloud.pushTimer = null;
+    if (!Cloud.user || Cloud.syncing) return;
+    Cloud.pushNow();
+  }, 2000);
 };
 
 Cloud.pushNow = function (cb) {
