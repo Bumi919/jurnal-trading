@@ -108,7 +108,7 @@ Cloud.resendConfirm = function (email, cb) {
 var authMode = 'in';
 
 Cloud.renderAuth = function () {
-  $('#pageTitle').textContent = 'Masuk';
+  $('#pageTitle').textContent = t('Masuk');
   $$('#nav a').forEach(function (a) { a.classList.remove('active'); });
 
   var html =
@@ -116,42 +116,42 @@ Cloud.renderAuth = function () {
       '<div class="auth-grid">' +
         '<div class="auth-brand">' +
           '<div class="auth-logo">JT</div>' +
-          '<h2>Jurnal Trading</h2>' +
-          '<p>Catatan dan evaluasi transaksi yang tersinkron di semua perangkat kamu.</p>' +
+          '<h2>' + t('Jurnal Trading') + '</h2>' +
+          '<p>' + t('Catatan dan evaluasi transaksi yang tersinkron di semua perangkat kamu.') + '</p>' +
           '<ul class="auth-feats">' +
-            '<li><span class="fdot"></span><div><b>Dashboard performa</b><span>Win rate, profit factor, equity curve</span></div></li>' +
-            '<li><span class="fdot"></span><div><b>Kalender dan analitik</b><span>Heatmap harian dan laporan per setup</span></div></li>' +
-            '<li><span class="fdot"></span><div><b>Playbook dan risk plan</b><span>Checklist pre-trade dan batas risiko</span></div></li>' +
+            '<li><span class="fdot"></span><div><b>' + t('Dashboard performa') + '</b><span>' + t('Win rate, profit factor, equity curve') + '</span></div></li>' +
+            '<li><span class="fdot"></span><div><b>' + t('Kalender dan analitik') + '</b><span>' + t('Heatmap harian dan laporan per setup') + '</span></div></li>' +
+            '<li><span class="fdot"></span><div><b>' + t('Playbook dan risk plan') + '</b><span>' + t('Checklist pre-trade dan batas risiko') + '</span></div></li>' +
           '</ul>' +
-          '<div class="auth-secure">Data terisolasi per akun dan diamankan Row Level Security</div>' +
+          '<div class="auth-secure">' + t('Data terisolasi per akun dan diamankan Row Level Security') + '</div>' +
         '</div>' +
         '<div class="auth-form-side">' +
           '<div class="auth-card">' +
-            '<h2>' + (authMode === 'in' ? 'Selamat datang kembali' : 'Buat akun baru') + '</h2>' +
+            '<h2>' + (authMode === 'in' ? t('Selamat datang kembali') : t('Buat akun baru')) + '</h2>' +
             '<p class="muted small" style="margin-top:0">' +
               (authMode === 'in'
-                ? 'Masuk untuk membuka jurnal kamu.'
-                : 'Satu akun untuk semua perangkat.') + '</p>' +
+                ? t('Masuk untuk membuka jurnal kamu.')
+                : t('Satu akun untuk semua perangkat.')) + '</p>' +
             '<div class="auth-tabs">' +
-              '<button class="atab' + (authMode === 'in' ? ' active' : '') + '" id="tabIn" type="button">Masuk</button>' +
-              '<button class="atab' + (authMode === 'up' ? ' active' : '') + '" id="tabUp" type="button">Daftar</button>' +
+              '<button class="atab' + (authMode === 'in' ? ' active' : '') + '" id="tabIn" type="button">' + t('Masuk') + '</button>' +
+              '<button class="atab' + (authMode === 'up' ? ' active' : '') + '" id="tabUp" type="button">' + t('Daftar') + '</button>' +
             '</div>' +
             '<div id="authErr"></div>' +
-            '<div class="field"><label>Email</label>' +
+            '<div class="field"><label>' + t('Email') + '</label>' +
               '<input type="text" id="authEmail" placeholder="nama@email.com" autocomplete="email"></div>' +
-            '<div class="field"><label>Kata sandi (min. 6 karakter)</label>' +
+            '<div class="field"><label>' + t('Kata sandi (min. 6 karakter)') + '</label>' +
               '<div class="pass-wrap">' +
-                '<input type="password" id="authPass" placeholder="Kata sandi" autocomplete="current-password">' +
+                '<input type="password" id="authPass" placeholder="' + t('Kata sandi') + '" autocomplete="current-password">' +
                 '<button class="pass-toggle" id="passToggle" type="button" ' +
-                  'title="Tampilkan kata sandi" aria-label="Tampilkan kata sandi">' +
+                  'title="' + t('Tampilkan kata sandi') + '" aria-label="' + t('Tampilkan kata sandi') + '">' +
                   Cloud.eyeSvg(false) +
                 '</button>' +
               '</div></div>' +
             '<button class="btn btn-primary btn-lg btn-block" id="authGo" type="button">' +
-              (authMode === 'in' ? 'Masuk ke Jurnal' : 'Daftar Akun') + '</button>' +
+              (authMode === 'in' ? t('Masuk ke Jurnal') : t('Daftar Akun')) + '</button>' +
             '<div id="authInfo" style="margin-top:12px"></div>' +
-            '<div class="auth-alt"><span>atau</span></div>' +
-            '<button class="btn btn-ghost btn-block" id="authLocal" type="button">Lanjut tanpa akun (mode lokal)</button>' +
+            '<div class="auth-alt"><span>' + t('atau') + '</span></div>' +
+            '<button class="btn btn-ghost btn-block" id="authLocal" type="button">' + t('Lanjut tanpa akun (mode lokal)') + '</button>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -173,18 +173,18 @@ Cloud.renderAuth = function () {
     $('#authInfo').innerHTML = '';
     var email = $('#authEmail').value.trim();
     var pass = $('#authPass').value;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('Alamat email tidak valid.'); return; }
-    if (!pass || pass.length < 6) { showErr('Kata sandi minimal 6 karakter.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr(t('Alamat email tidak valid.')); return; }
+    if (!pass || pass.length < 6) { showErr(t('Kata sandi minimal 6 karakter.')); return; }
 
     var btn = $('#authGo');
     btn.disabled = true;
-    btn.textContent = 'Memproses...';
+    btn.textContent = t('Memproses...');
 
     if (authMode === 'in') {
       Cloud.signIn(email, pass, function (err) {
         btn.disabled = false;
         if (err) {
-          btn.textContent = 'Masuk';
+          btn.textContent = t('Masuk');
           showErr(Cloud.friendlyError(err));
           return;
         }
@@ -193,20 +193,20 @@ Cloud.renderAuth = function () {
     } else {
       Cloud.signUp(email, pass, function (err, data) {
         btn.disabled = false;
-        btn.textContent = 'Daftar Akun';
+        btn.textContent = t('Daftar Akun');
         if (err) { showErr(Cloud.friendlyError(err)); return; }
         if (data && data.session) {
           // Konfirmasi email nonaktif: langsung masuk, handler menarik data.
           return;
         }
-        $('#authInfo').innerHTML = '<div class="alert info"><strong>Akun dibuat.</strong>' +
-          'Cek kotak masuk email untuk verifikasi, lalu masuk. ' +
-          '<a href="#" id="authResend">Kirim ulang email.</a></div>';
+        $('#authInfo').innerHTML = '<div class="alert info"><strong>' + t('Akun dibuat.') + '</strong>' +
+          t('Cek kotak masuk email untuk verifikasi, lalu masuk.') + ' ' +
+          '<a href="#" id="authResend">' + t('Kirim ulang email.') + '</a></div>';
         var rs = $('#authResend');
         if (rs) rs.addEventListener('click', function (e) {
           e.preventDefault();
           Cloud.resendConfirm(email, function (rerr) {
-            toast(rerr ? Cloud.friendlyError(rerr) : 'Email verifikasi dikirim ulang', rerr ? 'err' : 'ok');
+            toast(rerr ? Cloud.friendlyError(rerr) : t('Email verifikasi dikirim ulang'), rerr ? 'err' : 'ok');
           });
         });
       });
@@ -223,7 +223,7 @@ Cloud.renderAuth = function () {
     var show = input.type === 'password';
     input.type = show ? 'text' : 'password';
     this.innerHTML = Cloud.eyeSvg(show);
-    var label = show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi';
+    var label = show ? t('Sembunyikan kata sandi') : t('Tampilkan kata sandi');
     this.title = label;
     this.setAttribute('aria-label', label);
     input.focus();
@@ -250,13 +250,13 @@ Cloud.eyeSvg = function (open) {
 };
 
 Cloud.friendlyError = function (err) {
-  var msg = (err && err.message) ? err.message : String(err || 'Terjadi kesalahan');
-  if (/invalid login credentials/i.test(msg)) return 'Email atau kata sandi salah.';
-  if (/user already registered/i.test(msg)) return 'Email ini sudah terdaftar. Silakan masuk.';
-  if (/email not confirmed/i.test(msg)) return 'Email belum diverifikasi. Cek kotak masuk kamu.';
-  if (/rate limit/i.test(msg)) return 'Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.';
-  if (/password/i.test(msg) && /short|length|6/i.test(msg)) return 'Kata sandi minimal 6 karakter.';
-  if (/network|fetch|failed/i.test(msg)) return 'Tidak bisa menghubungi server. Periksa koneksi internet.';
+  var msg = (err && err.message) ? err.message : String(err || t('Terjadi kesalahan'));
+  if (/invalid login credentials/i.test(msg)) return t('Email atau kata sandi salah.');
+  if (/user already registered/i.test(msg)) return t('Email ini sudah terdaftar. Silakan masuk.');
+  if (/email not confirmed/i.test(msg)) return t('Email belum diverifikasi. Cek kotak masuk kamu.');
+  if (/rate limit/i.test(msg)) return t('Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.');
+  if (/password/i.test(msg) && /short|length|6/i.test(msg)) return t('Kata sandi minimal 6 karakter.');
+  if (/network|fetch|failed/i.test(msg)) return t('Tidak bisa menghubungi server. Periksa koneksi internet.');
   return msg;
 };
 
@@ -264,58 +264,57 @@ Cloud.friendlyError = function (err) {
 
 Cloud.accountHtml = function () {
   if (!Cloud.configured()) {
-    return '<div class="row"><span>Mode</span><b>Lokal</b></div>';
+    return '<div class="row"><span>' + t('Mode') + '</span><b>' + t('Lokal') + '</b></div>';
   }
   if (Cloud.user) {
-    return '<div class="row"><span>Akun</span><b style="overflow:hidden;text-overflow:ellipsis;max-width:130px">' +
+    return '<div class="row"><span>' + t('Akun') + '</span><b style="overflow:hidden;text-overflow:ellipsis;max-width:130px">' +
       esc(Cloud.user.email) + '</b></div>' +
-      '<div class="row"><span>Status</span><b class="pos">Tersinkron</b></div>';
+      '<div class="row"><span>' + t('Status') + '</span><b class="pos">' + t('Tersinkron') + '</b></div>';
   }
   if (Cloud.localOnly) {
-    return '<div class="row"><span>Mode</span><b>Lokal</b></div>';
+    return '<div class="row"><span>' + t('Mode') + '</span><b>' + t('Lokal') + '</b></div>';
   }
-  return '<div class="row"><span>Akun</span><b>Belum masuk</b></div>';
+  return '<div class="row"><span>' + t('Akun') + '</span><b>' + t('Belum masuk') + '</b></div>';
 };
 
 /* ---------- Kartu akun di Pengaturan ---------- */
 
 Cloud.settingsHtml = function () {
-  var html = '<div class="card-head"><h2>Akun dan Sinkronisasi</h2></div>';
+  var html = '<div class="card-head"><h2>' + t('Akun dan Sinkronisasi') + '</h2></div>';
 
   if (!Cloud.hasConfig()) {
     return html +
-      '<p class="muted small" style="margin-top:0">Mode lokal: data hanya tersimpan di browser ini. ' +
-      'Untuk login email dan sinkron antar perangkat, isi <b>js/config.js</b> dengan URL dan ' +
-      'anon key Supabase, lalu jalankan <b>supabase/schema.sql</b> di SQL Editor. ' +
-      'Panduan ada di README.</p>';
+      '<p class="muted small" style="margin-top:0">' +
+      t('Mode lokal: data hanya tersimpan di browser ini. Untuk login email dan sinkron antar perangkat, isi {a} dengan URL dan anon key Supabase, lalu jalankan {b} di SQL Editor. Panduan ada di README.',
+        { a: 'js/config.js', b: 'supabase/schema.sql' }) + '</p>';
   }
   if (!Cloud.libReady()) {
     return html +
-      '<div class="alert warn"><strong>Pustaka Supabase tidak termuat.</strong>' +
-      'Periksa koneksi internet lalu muat ulang halaman.</div>';
+      '<div class="alert warn"><strong>' + t('Pustaka Supabase tidak termuat.') + '</strong>' +
+      t('Periksa koneksi internet lalu muat ulang halaman.') + '</div>';
   }
   if (!Cloud.user) {
     return html +
-      '<p class="muted small" style="margin-top:0">Kamu belum masuk. Data yang tampil adalah ' +
-      'salinan lokal di browser ini.</p>' +
-      '<button class="btn btn-primary" id="goLogin" type="button">Masuk / Daftar</button>';
+      '<p class="muted small" style="margin-top:0">' +
+      t('Kamu belum masuk. Data yang tampil adalah salinan lokal di browser ini.') + '</p>' +
+      '<button class="btn btn-primary" id="goLogin" type="button">' + t('Masuk / Daftar') + '</button>';
   }
 
   return html +
     '<div class="kv">' +
-      '<dt>Email</dt><dd>' + esc(Cloud.user.email) + '</dd>' +
-      '<dt>Status</dt><dd class="pos">Tersinkron ke cloud</dd>' +
-      '<dt>Sinkron terakhir</dt><dd>' + esc(Cloud.lastPush || 'belum pernah') +
+      '<dt>' + t('Email') + '</dt><dd>' + esc(Cloud.user.email) + '</dd>' +
+      '<dt>' + t('Status') + '</dt><dd class="pos">' + t('Tersinkron ke cloud') + '</dd>' +
+      '<dt>' + t('Sinkron terakhir') + '</dt><dd>' + esc(Cloud.lastPush || t('belum pernah')) +
         (Cloud.lastPushError ? ' <span class="neg">(' + esc(Cloud.lastPushError) + ')</span>' : '') +
       '</dd>' +
     '</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">' +
-      '<button class="btn" id="pushNow" type="button">Sinkron Sekarang</button>' +
-      '<button class="btn" id="pullNow" type="button">Muat Ulang dari Cloud</button>' +
-      '<button class="btn btn-ghost" id="logOut" type="button">Keluar</button>' +
+      '<button class="btn" id="pushNow" type="button">' + t('Sinkron Sekarang') + '</button>' +
+      '<button class="btn" id="pullNow" type="button">' + t('Muat Ulang dari Cloud') + '</button>' +
+      '<button class="btn btn-ghost" id="logOut" type="button">' + t('Keluar') + '</button>' +
     '</div>' +
-    '<p class="muted small" style="margin:12px 0 0">Perubahan tersimpan otomatis ke cloud ' +
-    'beberapa detik setelah kamu mengedit.</p>';
+    '<p class="muted small" style="margin:12px 0 0">' +
+    t('Perubahan tersimpan otomatis ke cloud beberapa detik setelah kamu mengedit.') + '</p>';
 };
 
 Cloud.bindSettings = function () {
@@ -331,7 +330,7 @@ Cloud.bindSettings = function () {
     push.disabled = true;
     Cloud.pushNow(function (err) {
       push.disabled = false;
-      toast(err ? 'Gagal sinkron: ' + err : 'Sinkron ke cloud selesai', err ? 'err' : 'ok');
+      toast(err ? t('Gagal sinkron: {m}', { m: err }) : t('Sinkron ke cloud selesai'), err ? 'err' : 'ok');
       renderSettings();
       renderSidebarSummary();
     });
@@ -339,22 +338,22 @@ Cloud.bindSettings = function () {
 
   var pull = $('#pullNow');
   if (pull) pull.addEventListener('click', function () {
-    confirmDialog('Muat ulang dari cloud',
-      'Data lokal akan diganti dengan data dari cloud. Perubahan lokal yang belum tersinkron akan hilang. Lanjutkan?',
+    confirmDialog(t('Muat ulang dari cloud'),
+      t('Data lokal akan diganti dengan data dari cloud. Perubahan lokal yang belum tersinkron akan hilang. Lanjutkan?'),
       function () {
         Cloud.pullNow(function (err) {
-          if (err) { toast('Gagal memuat: ' + err, 'err'); return; }
+          if (err) { toast(t('Gagal memuat: {m}', { m: err }), 'err'); return; }
           refresh();
-          toast('Data dimuat dari cloud', 'ok');
+          toast(t('Data dimuat dari cloud'), 'ok');
         });
-      }, 'Muat Ulang');
+      }, t('Muat Ulang'));
   });
 
   var out = $('#logOut');
   if (out) out.addEventListener('click', function () {
-    confirmDialog('Keluar akun',
-      'Kamu akan keluar. Salinan lokal terakhir tetap tampil di browser ini.',
-      function () { Cloud.signOut(); }, 'Keluar');
+    confirmDialog(t('Keluar akun'),
+      t('Kamu akan keluar. Salinan lokal terakhir tetap tampil di browser ini.'),
+      function () { Cloud.signOut(); }, t('Keluar'));
   });
 };
 
@@ -441,7 +440,7 @@ Cloud.applyProfile = function (target, r) {
 /* ---------- Tarik (cloud -> lokal) ---------- */
 
 Cloud.pullNow = function (cb) {
-  if (!Cloud.user) { cb('belum masuk'); return; }
+  if (!Cloud.user) { cb(t('belum masuk')); return; }
   Cloud.syncing = true;
   var c = Cloud.client;
   var uid = Cloud.user.id;
@@ -476,7 +475,7 @@ Cloud.pullNow = function (cb) {
   }).catch(function (e) {
     Cloud.syncing = false;
     console.error('Pull gagal:', e);
-    cb((e && e.message) || 'gagal memuat');
+    cb((e && e.message) || t('gagal memuat'));
   });
 };
 
@@ -494,7 +493,7 @@ Cloud.schedulePush = function () {
 
 Cloud.pushNow = function (cb) {
   cb = cb || function () {};
-  if (!Cloud.user) { cb('belum masuk'); return; }
+  if (!Cloud.user) { cb(t('belum masuk')); return; }
   if (Cloud.pushing) { Cloud.pushQueued = true; cb(null); return; }
   Cloud.pushing = true;
 
@@ -518,7 +517,7 @@ Cloud.pushNow = function (cb) {
   Cloud.uploadPendingShots()
     .then(function () { return Cloud.upsertAll(); })
     .then(function () { done(null); })
-    .catch(function (e) { done((e && e.message) || 'gagal sinkron'); });
+    .catch(function (e) { done((e && e.message) || t('gagal sinkron')); });
 };
 
 /* Unggah screenshot yang masih berupa data URL ke Storage,

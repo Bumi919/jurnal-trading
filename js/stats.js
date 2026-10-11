@@ -98,7 +98,7 @@ var Stats = {
     var points = [];
     var value = state.settings.initialCapital;
 
-    points.push({ date: '', value: value, label: 'Modal awal' });
+    points.push({ date: '', value: value, label: t('Modal awal') });
 
     closed.forEach(function (t) {
       value += t.pnl;
@@ -206,13 +206,13 @@ var Stats = {
   },
 
   bySymbol: function (trades) {
-    return Stats.groupBy(trades, function (t) { return t.symbol || 'TANPA'; });
+    return Stats.groupBy(trades, function (tr) { return tr.symbol || t('TANPA'); });
   },
 
   bySetup: function (trades, state) {
     var nameOf = function (id) {
       var s = SetupStore.get(state, id);
-      return s ? s.name : (id ? 'Terhapus' : '');
+      return s ? s.name : (id ? t('Terhapus') : '');
     };
     return Stats.groupBy(trades, function (t) { return nameOf(t.setupId); });
   },
@@ -224,7 +224,7 @@ var Stats = {
   },
 
   byWeekday: function (trades) {
-    var names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    var names = weekdayNames();
     var groups = Stats.groupBy(trades, function (t) {
       var d = (t.exitDate || t.entryDate || '').slice(0, 10);
       if (!d) return '';
@@ -255,12 +255,12 @@ var Stats = {
   },
 
   byMood: function (trades) {
-    return Stats.groupBy(trades, function (t) { return t.mood || 'Tidak diisi'; });
+    return Stats.groupBy(trades, function (tr) { return tr.mood || t('Tidak diisi'); });
   },
 
   byQuality: function (trades) {
-    var groups = Stats.groupBy(trades, function (t) {
-      return t.quality > 0 ? t.quality + ' dari 5' : 'Tidak dinilai';
+    var groups = Stats.groupBy(trades, function (tr) {
+      return tr.quality > 0 ? t('{n} dari 5', { n: tr.quality }) : t('Tidak dinilai');
     });
     return groups.sort(function (a, b) { return a.key.localeCompare(b.key); });
   },
@@ -280,10 +280,10 @@ var Stats = {
   rDistribution: function (trades) {
     var bins = [
       { label: 'R < -1', from: -Infinity, to: -1, count: 0, pnl: 0 },
-      { label: '-1 s/d 0', from: -1, to: 0, count: 0, pnl: 0 },
-      { label: '0 s/d 1', from: 0, to: 1, count: 0, pnl: 0 },
-      { label: '1 s/d 2', from: 1, to: 2, count: 0, pnl: 0 },
-      { label: '2 s/d 3', from: 2, to: 3, count: 0, pnl: 0 },
+      { label: t('-1 s/d 0'), from: -1, to: 0, count: 0, pnl: 0 },
+      { label: t('0 s/d 1'), from: 0, to: 1, count: 0, pnl: 0 },
+      { label: t('1 s/d 2'), from: 1, to: 2, count: 0, pnl: 0 },
+      { label: t('2 s/d 3'), from: 2, to: 3, count: 0, pnl: 0 },
       { label: 'R > 3', from: 3, to: Infinity, count: 0, pnl: 0 }
     ];
 
@@ -345,14 +345,15 @@ var Stats = {
     // 1. Risiko per trade melebihi batas
     var maxRiskAmount = capital * (settings.maxRiskPctTrade / 100);
     if (maxRiskAmount > 0) {
-      state.trades.forEach(function (t) {
-        if (t.risk > maxRiskAmount * 1.0001) {
+      state.trades.forEach(function (tr) {
+        if (tr.risk > maxRiskAmount * 1.0001) {
           out.push({
-            type: 'Risiko per trade',
-            detail: t.symbol + ' pada ' + shortDate(t.entryDate) +
-              ' berisikan ' + fmtMoney(settings.currency, t.risk) +
-              ', melebihi batas ' + fmtMoney(settings.currency, maxRiskAmount),
-            tradeId: t.id
+            type: t('Risiko per trade'),
+            detail: t('{sym} pada {date} berisikan {risk}, melebihi batas {limit}',
+              { sym: tr.symbol, date: shortDate(tr.entryDate),
+                risk: fmtMoney(settings.currency, tr.risk),
+                limit: fmtMoney(settings.currency, maxRiskAmount) }),
+            tradeId: tr.id
           });
         }
       });
@@ -365,10 +366,11 @@ var Stats = {
       Object.keys(daily).forEach(function (day) {
         if (daily[day].pnl < -maxDailyLoss) {
           out.push({
-            type: 'Batas rugi harian',
-            detail: shortDate(day) + ' rugi ' +
-              fmtMoney(settings.currency, Math.abs(daily[day].pnl)) +
-              ', melebihi batas ' + fmtMoney(settings.currency, maxDailyLoss),
+            type: t('Batas rugi harian'),
+            detail: t('{date} rugi {loss}, melebihi batas {limit}',
+              { date: shortDate(day),
+                loss: fmtMoney(settings.currency, Math.abs(daily[day].pnl)),
+                limit: fmtMoney(settings.currency, maxDailyLoss) }),
             tradeId: null
           });
         }
@@ -377,19 +379,18 @@ var Stats = {
 
     // 3. Rentetan rugi beruntun
     var run = 0;
-    closed.forEach(function (t) {
-      if (t.result === 'loss') {
+    closed.forEach(function (tr) {
+      if (tr.result === 'loss') {
         run++;
         if (run === settings.maxLossStreak) {
           out.push({
-            type: 'Rugi beruntun',
-            detail: 'Sudah ' + run + ' rugi beruntun sampai trade ' +
-              t.symbol + ' pada ' + shortDate(t.exitDate || t.entryDate) +
-              '. Seharusnya berhenti.',
-            tradeId: t.id
+            type: t('Rugi beruntun'),
+            detail: t('Sudah {n} rugi beruntun sampai trade {sym} pada {date}. Seharusnya berhenti.',
+              { n: run, sym: tr.symbol, date: shortDate(tr.exitDate || tr.entryDate) }),
+            tradeId: tr.id
           });
         }
-      } else if (t.result === 'win') {
+      } else if (tr.result === 'win') {
         run = 0;
       }
     });
@@ -431,10 +432,10 @@ var Stats = {
   sidebar: function (state) {
     var s = Stats.summary(state);
     return [
-      { label: 'Modal', value: fmtMoney(state.settings.currency, s.capitalNow) },
-      { label: 'Total P/L', value: fmtSigned(state.settings.currency, s.totalPnl), cls: signClass(s.totalPnl) },
-      { label: 'Win rate', value: s.winRate.toFixed(1) + '%' },
-      { label: 'Profit factor',
+      { label: t('Modal'), value: fmtMoney(state.settings.currency, s.capitalNow) },
+      { label: t('Total P/L'), value: fmtSigned(state.settings.currency, s.totalPnl), cls: signClass(s.totalPnl) },
+      { label: t('Win rate'), value: s.winRate.toFixed(1) + '%' },
+      { label: t('Profit factor'),
         value: isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : 'n/a' }
     ];
   }
@@ -446,7 +447,7 @@ function fmtMoney(currency, value) {
   var c = currency || '$';
   var n = Number(value) || 0;
   var sign = n < 0 ? '-' : '';
-  return sign + c + Math.abs(n).toLocaleString('id-ID', {
+  return sign + c + Math.abs(n).toLocaleString(numLocale(), {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
@@ -482,8 +483,7 @@ function shortDateTime(value) {
 }
 
 function monthLabel(key) {
-  var names = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  var names = monthNames();
   if (!key || key.length < 7) return key;
   var y = key.slice(0, 4);
   var m = parseInt(key.slice(5, 7), 10) - 1;

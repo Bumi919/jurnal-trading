@@ -146,7 +146,23 @@ a { color: var(--accent); text-decoration: none; }
   font-weight: 650;
   flex: 1;
 }
-.topbar-actions { display: flex; gap: 8px; }
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+.lang-sel {
+  width: auto;
+  padding: 7px 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--panel-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  cursor: pointer;
+  font-family: inherit;
+  outline: none;
+}
+.lang-sel:hover { color: var(--text); border-color: #3a4756; }
+.lang-sel:focus { border-color: var(--accent); }
 
 .view {
   padding: 24px;

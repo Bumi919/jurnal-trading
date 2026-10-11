@@ -5,7 +5,7 @@
 var Charts = {
 
   empty: function (msg) {
-    return '<div class="chart-empty">' + esc(msg || 'Belum ada data untuk ditampilkan') + '</div>';
+    return '<div class="chart-empty">' + esc(msg || t('Belum ada data untuk ditampilkan')) + '</div>';
   },
 
   /* ---------- Grafik garis (equity curve) ----------
@@ -207,7 +207,7 @@ var Charts = {
   donut: function (opts) {
     var parts = (opts.parts || []).filter(function (p) { return p.value > 0; });
     var total = parts.reduce(function (a, p) { return a + p.value; }, 0);
-    if (total === 0) return Charts.empty(opts.emptyMsg || 'Belum ada data');
+    if (total === 0) return Charts.empty(opts.emptyMsg || t('Belum ada data'));
 
     var size = 132, r = 48, cx = size / 2, cy = size / 2;
     var circ = 2 * Math.PI * r;

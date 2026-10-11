@@ -254,10 +254,10 @@ var DataPort = {
 
   exportCSV: function (state) {
     var headers = [
-      'Tanggal Entry', 'Tanggal Exit', 'Simbol', 'Pasar', 'Arah', 'Status',
-      'Hasil', 'Entry', 'Exit', 'SL', 'TP', 'Lot', 'Pips',
-      'Risiko', 'PnL', 'R Multiple', 'Setup', 'Tags',
-      'Kualitas', 'Mood', 'Disiplin', 'Catatan'
+      t('Tanggal Entry'), t('Tanggal Exit'), t('Simbol'), t('Pasar'), t('Arah'), t('Status'),
+      t('Hasil'), t('Entry'), t('Exit'), 'SL', 'TP', t('Lot'), t('Pips'),
+      t('Risiko'), t('PnL'), t('R Multiple'), t('Setup'), t('Tags'),
+      t('Kualitas'), t('Mood'), t('Disiplin'), t('Catatan')
     ];
 
     var setupName = function (id) {
@@ -304,7 +304,7 @@ var DataPort = {
       }
     };
     reader.onerror = function () {
-      callback(new Error('File tidak bisa dibaca'), null);
+      callback(new Error(t('File tidak bisa dibaca')), null);
     };
     reader.readAsText(file);
   }

@@ -20,7 +20,7 @@ function $$(sel, root) {
 
 function save() {
   var ok = Storage.save(state);
-  if (!ok) toast('Gagal menyimpan. Penyimpanan browser mungkin penuh.', 'err');
+  if (!ok) toast(t('Gagal menyimpan. Penyimpanan browser mungkin penuh.'), 'err');
   if (typeof Cloud !== 'undefined') Cloud.schedulePush();
   return ok;
 }
@@ -60,8 +60,8 @@ function confirmDialog(title, message, onOk, okLabel) {
       '<div class="modal-head"><h2>' + esc(title) + '</h2></div>' +
       '<div class="modal-body"><p style="margin:0">' + esc(message) + '</p></div>' +
       '<div class="modal-foot">' +
-        '<button class="btn btn-ghost" data-close>Batal</button>' +
-        '<button class="btn btn-danger" id="confirmOk">' + esc(okLabel || 'Hapus') + '</button>' +
+        '<button class="btn btn-ghost" data-close>' + t('Batal') + '</button>' +
+        '<button class="btn btn-danger" id="confirmOk">' + esc(okLabel || t('Hapus')) + '</button>' +
       '</div>' +
     '</div>'
   );
@@ -86,7 +86,7 @@ function setupName(id) {
 }
 
 function setupOptions(selected) {
-  var html = '<option value="">Tanpa setup</option>';
+  var html = '<option value="">' + t('Tanpa setup') + '</option>';
   state.setups.forEach(function (s) {
     html += '<option value="' + esc(s.id) + '"' +
       (s.id === selected ? ' selected' : '') + '>' + esc(s.name) + '</option>';
@@ -97,7 +97,7 @@ function setupOptions(selected) {
 function selectHtml(id, options, selected, placeholder) {
   var html = '<select id="' + id + '">';
   if (placeholder !== null) {
-    html += '<option value="">' + esc(placeholder || 'Semua') + '</option>';
+    html += '<option value="">' + esc(placeholder || t('Semua')) + '</option>';
   }
   options.forEach(function (o) {
     var val = typeof o === 'object' ? o.value : o;
@@ -128,14 +128,14 @@ function filteredTrades(trades, f) {
   });
 }
 
-function resultBadge(t) {
+function resultBadge(tr) {
   var map = {
-    win: ['win', 'Win'],
-    loss: ['loss', 'Loss'],
-    open: ['open', 'Open'],
-    be: ['be', 'Breakeven']
+    win: ['win', t('Win')],
+    loss: ['loss', t('Loss')],
+    open: ['open', t('Open')],
+    be: ['be', t('Breakeven')]
   };
-  var m = map[t.result] || ['be', '-'];
+  var m = map[tr.result] || ['be', '-'];
   return '<span class="badge ' + m[0] + '">' + m[1] + '</span>';
 }
 
@@ -165,13 +165,13 @@ function statCard(label, value, sub, cls) {
    ========================================================= */
 
 var ROUTES = {
-  dashboard: { title: 'Dashboard', render: renderDashboard },
-  trades: { title: 'Log Transaksi', render: renderTrades },
-  calendar: { title: 'Kalender', render: renderCalendar },
-  analytics: { title: 'Analitik', render: renderAnalytics },
-  playbook: { title: 'Playbook', render: renderPlaybook },
-  risk: { title: 'Risk & Plan', render: renderRisk },
-  settings: { title: 'Pengaturan', render: renderSettings }
+  dashboard: { title: t('Dashboard'), render: renderDashboard },
+  trades: { title: t('Log Transaksi'), render: renderTrades },
+  calendar: { title: t('Kalender'), render: renderCalendar },
+  analytics: { title: t('Analitik'), render: renderAnalytics },
+  playbook: { title: t('Playbook'), render: renderPlaybook },
+  risk: { title: t('Risk & Plan'), render: renderRisk },
+  settings: { title: t('Pengaturan'), render: renderSettings }
 };
 
 function route() {
@@ -228,30 +228,29 @@ function renderDashboard() {
   // Peringatan aturan
   var today = Stats.todayRisk(state);
   if (today.hitDailyLoss) {
-    html += '<div class="alert danger"><strong>Batas rugi harian tercapai</strong>' +
-      'P/L hari ini ' + fmtSigned(cur, today.pnl) + ' sudah menyentuh batas ' +
-      fmtMoney(cur, today.dailyLimit) + '. Sebaiknya hentikan trading hari ini.' +
+    html += '<div class="alert danger"><strong>' + t('Batas rugi harian tercapai') + '</strong>' +
+      t('P/L hari ini {pnl} sudah menyentuh batas {limit}. Sebaiknya hentikan trading hari ini.',
+        { pnl: fmtSigned(cur, today.pnl), limit: fmtMoney(cur, today.dailyLimit) }) +
       '</div>';
   } else if (today.hitRisk) {
-    html += '<div class="alert warn"><strong>Total risiko hari ini melebihi batas</strong>' +
-      'Risiko terpakai ' + fmtMoney(cur, today.riskUsed) + ' dari batas ' +
-      fmtMoney(cur, today.riskLimit) + ' per hari.' +
+    html += '<div class="alert warn"><strong>' + t('Total risiko hari ini melebihi batas') + '</strong>' +
+      t('Risiko terpakai {used} dari batas {limit} per hari.',
+        { used: fmtMoney(cur, today.riskUsed), limit: fmtMoney(cur, today.riskLimit) }) +
       '</div>';
   }
 
   if (s.currentStreak.type === 'loss' && s.currentStreak.count >= state.settings.maxLossStreak) {
-    html += '<div class="alert danger"><strong>Rugi beruntun</strong>' +
-      'Anda mengalami ' + s.currentStreak.count + ' rugi beruntun. ' +
-      'Batasi diri sesuai aturan risk management.' +
+    html += '<div class="alert danger"><strong>' + t('Rugi beruntun') + '</strong>' +
+      t('Anda mengalami {n} rugi beruntun. Batasi diri sesuai aturan risk management.',
+        { n: s.currentStreak.count }) +
       '</div>';
   }
 
   if (!state.trades.length) {
     html += '<div class="empty">' +
-      '<div class="title">Belum ada data transaksi</div>' +
-      '<div class="desc">Mulai dengan mencatat trade pertama Anda, atau atur modal dan ' +
-      'aturan risiko di halaman Pengaturan.</div>' +
-      '<button class="btn btn-primary" id="emptyAdd">Tambah Trade Pertama</button>' +
+      '<div class="title">' + t('Belum ada data transaksi') + '</div>' +
+      '<div class="desc">' + t('Mulai dengan mencatat trade pertama Anda, atau atur modal dan aturan risiko di halaman Pengaturan.') + '</div>' +
+      '<button class="btn btn-primary" id="emptyAdd">' + t('Tambah Trade Pertama') + '</button>' +
       '</div>';
     $('#view').innerHTML = html;
     $('#emptyAdd').addEventListener('click', function () { openTradeModal(); });
@@ -260,55 +259,56 @@ function renderDashboard() {
 
   // Kartu statistik
   html += '<div class="grid g-6 section">' +
-    statCard('Total P/L', esc(fmtSigned(cur, s.totalPnl)),
-      'ROI ' + s.roi.toFixed(1) + '% dari modal', signClass(s.totalPnl)) +
-    statCard('Win Rate', s.winRate.toFixed(1) + '%',
-      s.wins + ' menang / ' + s.losses + ' kalah') +
-    statCard('Profit Factor',
+    statCard(t('Total P/L'), esc(fmtSigned(cur, s.totalPnl)),
+      t('ROI {v}% dari modal', { v: s.roi.toFixed(1) }), signClass(s.totalPnl)) +
+    statCard(t('Win Rate'), s.winRate.toFixed(1) + '%',
+      t('{w} menang / {l} kalah', { w: s.wins, l: s.losses })) +
+    statCard(t('Profit Factor'),
       isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : 'n/a',
-      'Gross win ' + fmtMoney(cur, s.grossWin)) +
-    statCard('Rata-rata R', (s.avgR >= 0 ? '+' : '') + s.avgR.toFixed(2) + 'R',
-      'Expectancy ' + fmtSigned(cur, s.expectancy) + '/trade', signClass(s.avgR)) +
-    statCard('Max Drawdown', esc(fmtMoney(cur, s.maxDrawdown)),
-      s.maxDrawdownPct.toFixed(1) + '% dari puncak', 'neg') +
-    statCard('Total Trade', String(s.closedCount),
-      s.openCount + ' posisi terbuka') +
+      t('Gross win {m}', { m: fmtMoney(cur, s.grossWin) })) +
+    statCard(t('Rata-rata R'), (s.avgR >= 0 ? '+' : '') + s.avgR.toFixed(2) + 'R',
+      t('Expectancy {m}/trade', { m: fmtSigned(cur, s.expectancy) }), signClass(s.avgR)) +
+    statCard(t('Max Drawdown'), esc(fmtMoney(cur, s.maxDrawdown)),
+      t('{v}% dari puncak', { v: s.maxDrawdownPct.toFixed(1) }), 'neg') +
+    statCard(t('Total Trade'), String(s.closedCount),
+      t('{n} posisi terbuka', { n: s.openCount })) +
     '</div>';
 
   // Equity curve + donut
   var eqLabels = s.equity.map(function (p, i) {
-    return i === 0 ? 'Awal' : shortDate(p.date);
+    return i === 0 ? t('Awal') : shortDate(p.date);
   });
   var eqValues = s.equity.map(function (p) { return p.value; });
 
   html += '<div class="grid g-32 section">' +
     '<div class="card">' +
-      '<div class="card-head"><h2>Equity Curve</h2>' +
-      '<span class="small muted">Modal akhir ' +
-      esc(fmtMoney(cur, s.capitalNow)) + '</span></div>' +
+      '<div class="card-head"><h2>' + t('Equity Curve') + '</h2>' +
+      '<span class="small muted">' + t('Modal akhir {m}', { m: fmtMoney(cur, s.capitalNow) }) + '</span></div>' +
       Charts.line({
         values: eqValues,
         labels: eqLabels,
         height: 240,
-        format: function (v) { return cur + Math.round(v).toLocaleString('id-ID'); }
+        format: function (v) { return cur + Math.round(v).toLocaleString(numLocale()); }
       }) +
     '</div>' +
     '<div class="card">' +
-      '<div class="card-head"><h2>Komposisi Hasil</h2></div>' +
+      '<div class="card-head"><h2>' + t('Komposisi Hasil') + '</h2></div>' +
       Charts.donut({
         parts: [
-          { label: 'Win', value: s.wins, color: '#22c55e' },
-          { label: 'Loss', value: s.losses, color: '#ef4444' },
-          { label: 'Breakeven', value: s.breakevens, color: '#6b7a89' }
+          { label: t('Win'), value: s.wins, color: '#22c55e' },
+          { label: t('Loss'), value: s.losses, color: '#ef4444' },
+          { label: t('Breakeven'), value: s.breakevens, color: '#6b7a89' }
         ]
       }) +
       '<div style="margin-top:16px" class="kv">' +
-        '<dt>Rentetan sekarang</dt><dd>' +
-          (s.currentStreak.type === 'none' ? 'Tidak ada' :
-            s.currentStreak.count + ' ' + s.currentStreak.type) + '</dd>' +
-        '<dt>Rentetan menang terpanjang</dt><dd>' + s.bestWinStreak + '</dd>' +
-        '<dt>Rentetan kalah terpanjang</dt><dd>' + s.worstLossStreak + '</dd>' +
-        '<dt>Rata-rata per trade</dt><dd class="' + signClass(s.avgPerTrade) + '">' +
+        '<dt>' + t('Rentetan sekarang') + '</dt><dd>' +
+          (s.currentStreak.type === 'none' ? t('Tidak ada') :
+            s.currentStreak.type === 'win'
+              ? t('{n} win', { n: s.currentStreak.count })
+              : t('{n} loss', { n: s.currentStreak.count })) + '</dd>' +
+        '<dt>' + t('Rentetan menang terpanjang') + '</dt><dd>' + s.bestWinStreak + '</dd>' +
+        '<dt>' + t('Rentetan kalah terpanjang') + '</dt><dd>' + s.worstLossStreak + '</dd>' +
+        '<dt>' + t('Rata-rata per trade') + '</dt><dd class="' + signClass(s.avgPerTrade) + '">' +
           esc(fmtSigned(cur, s.avgPerTrade)) + '</dd>' +
       '</div>' +
     '</div>' +
@@ -320,37 +320,37 @@ function renderDashboard() {
 
   html += '<div class="grid g-2 section">' +
     '<div class="card">' +
-      '<div class="card-head"><h2>PnL Bulanan</h2></div>' +
+      '<div class="card-head"><h2>' + t('PnL Bulanan') + '</h2></div>' +
       (monthly.length
         ? Charts.bars({
             labels: monthly.map(function (m) { return monthLabel(m.key); }),
             values: monthly.map(function (m) { return m.pnl; }),
             format: function (v) {
-              return (v > 0 ? '+' : '') + Math.round(v).toLocaleString('id-ID');
+              return (v > 0 ? '+' : '') + Math.round(v).toLocaleString(numLocale());
             },
             colorFn: function (v) { return v >= 0 ? '#22c55e' : '#ef4444'; }
           })
-        : Charts.empty('Belum ada trade tertutup')) +
+        : Charts.empty(t('Belum ada trade tertutup'))) +
     '</div>' +
     '<div class="card">' +
-      '<div class="card-head"><h2>Perbandingan Bulan</h2></div>' +
+      '<div class="card-head"><h2>' + t('Perbandingan Bulan') + '</h2></div>' +
       '<div class="kv">' +
         '<dt>' + esc(monthLabel(cmp.thisKey)) + '</dt>' +
         '<dd class="' + signClass(cmp.thisPnl) + '"><b>' +
-          esc(fmtSigned(cur, cmp.thisPnl)) + '</b> dari ' +
-          cmp.thisCount + ' trade</dd>' +
+          esc(fmtSigned(cur, cmp.thisPnl)) + '</b> ' +
+          t('dari {n} trade', { n: cmp.thisCount }) + '</dd>' +
         '<dt>' + esc(monthLabel(cmp.prevKey)) + '</dt>' +
         '<dd class="' + signClass(cmp.prevPnl) + '"><b>' +
-          esc(fmtSigned(cur, cmp.prevPnl)) + '</b> dari ' +
-          cmp.prevCount + ' trade</dd>' +
-        '<dt>Perubahan</dt><dd class="' +
+          esc(fmtSigned(cur, cmp.prevPnl)) + '</b> ' +
+          t('dari {n} trade', { n: cmp.prevCount }) + '</dd>' +
+        '<dt>' + t('Perubahan') + '</dt><dd class="' +
           signClass(cmp.thisPnl - cmp.prevPnl) + '"><b>' +
           esc(fmtSigned(cur, cmp.thisPnl - cmp.prevPnl)) + '</b></dd>' +
       '</div>' +
       '<div style="margin-top:14px">' +
-        '<h3>Target risiko hari ini</h3>' +
+        '<h3>' + t('Target risiko hari ini') + '</h3>' +
         '<div class="meter-row">' +
-          '<div class="lbl"><span>Risiko terpakai</span>' +
+          '<div class="lbl"><span>' + t('Risiko terpakai') + '</span>' +
           '<span class="mono">' + esc(fmtMoney(cur, today.riskUsed)) +
           ' / ' + esc(fmtMoney(cur, today.riskLimit)) + '</span></div>' +
           '<div class="bar-track"><div class="bar-fill ' +
@@ -380,8 +380,8 @@ function renderDashboard() {
   }).slice(0, 6);
 
   html += '<div class="card">' +
-    '<div class="card-head"><h2>Trade Terakhir</h2>' +
-    '<a href="#/trades" class="btn btn-ghost btn-sm">Lihat Semua</a></div>' +
+    '<div class="card-head"><h2>' + t('Trade Terakhir') + '</h2>' +
+    '<a href="#/trades" class="btn btn-ghost btn-sm">' + t('Lihat Semua') + '</a></div>' +
     tradeTable(recent, { compact: true }) +
     '</div>';
 
@@ -395,43 +395,43 @@ function renderDashboard() {
 function tradeTable(trades, opts) {
   opts = opts || {};
   if (!trades.length) {
-    return '<div class="empty"><div class="title">Tidak ada trade</div>' +
+    return '<div class="empty"><div class="title">' + t('Tidak ada trade') + '</div>' +
       '<div class="desc">' +
-      (opts.emptyMsg || 'Belum ada transaksi yang cocok dengan filter ini.') +
+      (opts.emptyMsg || t('Belum ada transaksi yang cocok dengan filter ini.')) +
       '</div></div>';
   }
 
-  var rows = trades.map(function (t) {
-    return '<tr data-id="' + esc(t.id) + '">' +
-      '<td>' + esc(shortDateTime(t.entryDate)) + '</td>' +
-      '<td><b>' + esc(t.symbol) + '</b></td>' +
-      '<td>' + sideBadge(t) + '</td>' +
-      '<td>' + resultBadge(t) + '</td>' +
+  var rows = trades.map(function (tr) {
+    return '<tr data-id="' + esc(tr.id) + '">' +
+      '<td>' + esc(shortDateTime(tr.entryDate)) + '</td>' +
+      '<td><b>' + esc(tr.symbol) + '</b></td>' +
+      '<td>' + sideBadge(tr) + '</td>' +
+      '<td>' + resultBadge(tr) + '</td>' +
       (opts.compact ? '' :
-        '<td class="num">' + esc(String(t.entryPrice || '-')) + '</td>' +
-        '<td class="num">' + esc(String(t.exitPrice || '-')) + '</td>' +
-        '<td class="num">' + esc(t.lot ? String(t.lot) : '-') + '</td>') +
-      '<td class="num muted">' + esc(fmtMoney(state.settings.currency, t.risk)) + '</td>' +
-      '<td class="num ' + signClass(t.pnl) + '">' +
-        (t.status === 'open' ? '-' : esc(fmtSigned(state.settings.currency, t.pnl))) + '</td>' +
-      '<td class="num ' + signClass(t.rMultiple) + '">' +
-        (t.status === 'open' ? '-' : (t.rMultiple >= 0 ? '+' : '') + t.rMultiple.toFixed(2) + 'R') + '</td>' +
-      '<td>' + esc(setupName(t.setupId) || '-') + '</td>' +
-      (opts.compact ? '' : '<td>' + tagsHtml(t.tags) + '</td>') +
+        '<td class="num">' + esc(String(tr.entryPrice || '-')) + '</td>' +
+        '<td class="num">' + esc(String(tr.exitPrice || '-')) + '</td>' +
+        '<td class="num">' + esc(tr.lot ? String(tr.lot) : '-') + '</td>') +
+      '<td class="num muted">' + esc(fmtMoney(state.settings.currency, tr.risk)) + '</td>' +
+      '<td class="num ' + signClass(tr.pnl) + '">' +
+        (tr.status === 'open' ? '-' : esc(fmtSigned(state.settings.currency, tr.pnl))) + '</td>' +
+      '<td class="num ' + signClass(tr.rMultiple) + '">' +
+        (tr.status === 'open' ? '-' : (tr.rMultiple >= 0 ? '+' : '') + tr.rMultiple.toFixed(2) + 'R') + '</td>' +
+      '<td>' + esc(setupName(tr.setupId) || '-') + '</td>' +
+      (opts.compact ? '' : '<td>' + tagsHtml(tr.tags) + '</td>') +
       '<td class="num">' +
-        '<button class="btn-icon" data-act="edit" data-id="' + esc(t.id) + '">Edit</button> ' +
-        '<button class="btn-icon" data-act="del" data-id="' + esc(t.id) + '">Hapus</button>' +
+        '<button class="btn-icon" data-act="edit" data-id="' + esc(tr.id) + '">' + t('Edit') + '</button> ' +
+        '<button class="btn-icon" data-act="del" data-id="' + esc(tr.id) + '">' + t('Hapus') + '</button>' +
       '</td>' +
       '</tr>';
   }).join('');
 
   return '<div class="table-wrap"><table>' +
     '<thead><tr>' +
-      '<th>Tanggal</th><th>Simbol</th><th>Arah</th><th>Hasil</th>' +
-      (opts.compact ? '' : '<th class="num">Entry</th><th class="num">Exit</th><th class="num">Lot</th>') +
-      '<th class="num">Risiko</th><th class="num">PnL</th><th class="num">R</th>' +
-      '<th>Setup</th>' + (opts.compact ? '' : '<th>Tag</th>') +
-      '<th class="num">Aksi</th>' +
+      '<th>' + t('Tanggal') + '</th><th>' + t('Simbol') + '</th><th>' + t('Arah') + '</th><th>' + t('Hasil') + '</th>' +
+      (opts.compact ? '' : '<th class="num">' + t('Entry') + '</th><th class="num">' + t('Exit') + '</th><th class="num">' + t('Lot') + '</th>') +
+      '<th class="num">' + t('Risiko') + '</th><th class="num">' + t('PnL') + '</th><th class="num">' + t('R') + '</th>' +
+      '<th>' + t('Setup') + '</th>' + (opts.compact ? '' : '<th>' + t('Tag') + '</th>') +
+      '<th class="num">' + t('Aksi') + '</th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
@@ -451,39 +451,39 @@ function renderTrades() {
 
   html += '<div class="card section">' +
     '<div class="filters">' +
-      '<div class="field w-md"><label>Cari</label>' +
-        '<input type="search" id="fQ" placeholder="Simbol, catatan, tag..." value="' +
+      '<div class="field w-md"><label>' + t('Cari') + '</label>' +
+        '<input type="search" id="fQ" placeholder="' + t('Simbol, catatan, tag...') + '" value="' +
         esc(tradeFilters.q) + '"></div>' +
-      '<div class="field w-sm"><label>Status</label>' +
+      '<div class="field w-sm"><label>' + t('Status') + '</label>' +
         selectHtml('fStatus', [
-          { value: 'closed', label: 'Selesai' },
-          { value: 'open', label: 'Terbuka' }
+          { value: 'closed', label: t('Selesai') },
+          { value: 'open', label: t('Terbuka') }
         ], tradeFilters.status) + '</div>' +
-      '<div class="field w-sm"><label>Arah</label>' +
+      '<div class="field w-sm"><label>' + t('Arah') + '</label>' +
         selectHtml('fSide', [
-          { value: 'long', label: 'Long' },
-          { value: 'short', label: 'Short' }
+          { value: 'long', label: t('Long') },
+          { value: 'short', label: t('Short') }
         ], tradeFilters.side) + '</div>' +
-      '<div class="field w-md"><label>Setup</label>' +
+      '<div class="field w-md"><label>' + t('Setup') + '</label>' +
         selectHtml('fSetup', state.setups.map(function (s) {
           return { value: s.id, label: s.name };
         }), tradeFilters.setup) + '</div>' +
-      '<div class="field w-sm"><label>Dari</label>' +
+      '<div class="field w-sm"><label>' + t('Dari') + '</label>' +
         '<input type="date" id="fFrom" value="' + esc(tradeFilters.from) + '"></div>' +
-      '<div class="field w-sm"><label>Sampai</label>' +
+      '<div class="field w-sm"><label>' + t('Sampai') + '</label>' +
         '<input type="date" id="fTo" value="' + esc(tradeFilters.to) + '"></div>' +
-      '<button class="btn btn-ghost" id="fReset" type="button">Reset</button>' +
+      '<button class="btn btn-ghost" id="fReset" type="button">' + t('Reset') + '</button>' +
     '</div>' +
 
     '<div class="grid g-4">' +
-      statCard('Trade', String(list.length),
-        Stats.open(list).length + ' masih terbuka') +
-      statCard('PnL', esc(fmtSigned(state.settings.currency, totalPnl)),
-        'Total risiko ' + esc(fmtMoney(state.settings.currency, totalRisk)),
+      statCard(t('Trade'), String(list.length),
+        t('{n} masih terbuka', { n: Stats.open(list).length })) +
+      statCard(t('PnL'), esc(fmtSigned(state.settings.currency, totalPnl)),
+        t('Total risiko {m}', { m: fmtMoney(state.settings.currency, totalRisk) }),
         signClass(totalPnl)) +
-      statCard('Win rate', wr.toFixed(1) + '%',
-        wins + ' menang dari ' + closed.length + ' selesai') +
-      statCard('Rata-rata R',
+      statCard(t('Win rate'), wr.toFixed(1) + '%',
+        t('{w} menang dari {n} selesai', { w: wins, n: closed.length })) +
+      statCard(t('Rata-rata R'),
         closed.length
           ? ((closed.reduce(function (a, t) { return a + t.rMultiple; }, 0) / closed.length).toFixed(2)) + 'R'
           : '0.00R',
@@ -491,12 +491,12 @@ function renderTrades() {
     '</div>' +
     '</div>';
 
-  html += tradeTable(list, { emptyMsg: 'Tidak ada trade yang cocok. Ubah filter atau tambah trade baru.' });
+  html += tradeTable(list, { emptyMsg: t('Tidak ada trade yang cocok. Ubah filter atau tambah trade baru.') });
 
   if (list.length) {
     html += '<div class="table-foot">' +
-      '<span>Menampilkan ' + list.length + ' dari ' + state.trades.length + ' trade</span>' +
-      '<span>Total PnL: <b class="' + signClass(totalPnl) + '">' +
+      '<span>' + t('Menampilkan {a} dari {b} trade', { a: list.length, b: state.trades.length }) + '</span>' +
+      '<span>' + t('Total PnL: ') + '<b class="' + signClass(totalPnl) + '">' +
       esc(fmtSigned(state.settings.currency, totalPnl)) + '</b></span>' +
       '</div>';
   }
@@ -535,14 +535,14 @@ function bindTradeTableActions(root) {
 
     if (act === 'edit') openTradeModal(id);
     if (act === 'del') {
-      var t = TradeStore.get(state, id);
-      confirmDialog('Hapus trade',
-        'Hapus trade ' + (t ? t.symbol + ' pada ' + shortDate(t.entryDate) : 'ini') +
-        '? Tindakan ini tidak bisa dibatalkan.',
+      var tr = TradeStore.get(state, id);
+      confirmDialog(t('Hapus trade'),
+        t('Hapus trade {info}? Tindakan ini tidak bisa dibatalkan.',
+          { info: tr ? tr.symbol + ' pada ' + shortDate(tr.entryDate) : t('ini') }),
         function () {
           TradeStore.remove(state, id);
           refresh();
-          toast('Trade dihapus');
+          toast(t('Trade dihapus'));
         });
     }
   });
@@ -568,11 +568,11 @@ function localDateTimeValue(d) {
 }
 
 function openTradeModal(id) {
-  var t = id ? TradeStore.get(state, id) : null;
-  if (id && !t) return;
-  pendingShot = t && t.screenshot ? t.screenshot : '';
+  var tr = id ? TradeStore.get(state, id) : null;
+  if (id && !tr) return;
+  pendingShot = tr && tr.screenshot ? tr.screenshot : '';
 
-  var v = t || {
+  var v = tr || {
     symbol: '', market: 'Forex', side: 'long', status: 'closed',
     entryDate: localDateTimeValue(), exitDate: localDateTimeValue(),
     entryPrice: '', exitPrice: '', sl: '', tp: '', lot: '', pips: '',
@@ -585,96 +585,96 @@ function openTradeModal(id) {
   var html =
   '<div class="modal">' +
     '<div class="modal-head">' +
-      '<h2>' + (t ? 'Edit Trade' : 'Tambah Trade') + '</h2>' +
-      '<button class="btn-icon" data-close type="button">Tutup</button>' +
+      '<h2>' + (tr ? t('Edit Trade') : t('Tambah Trade')) + '</h2>' +
+      '<button class="btn-icon" data-close type="button">' + t('Tutup') + '</button>' +
     '</div>' +
     '<div class="modal-body">' +
       '<form id="tradeForm">' +
 
-        '<fieldset><legend>Identitas Transaksi</legend>' +
+        '<fieldset><legend>' + t('Identitas Transaksi') + '</legend>' +
           '<div class="form-row-3">' +
-            '<div class="field"><label>Simbol / Pair *</label>' +
+            '<div class="field"><label>' + t('Simbol / Pair *') + '</label>' +
               '<input type="text" id="tSymbol" required placeholder="EURUSD, BTCUSD..." value="' +
               esc(v.symbol) + '"></div>' +
-            '<div class="field"><label>Pasar</label>' +
-              selectHtml('tMarket', MARKETS, v.market, null) + '</div>' +
-            '<div class="field"><label>Arah</label>' +
+            '<div class="field"><label>' + t('Pasar') + '</label>' +
+              selectHtml('tMarket', MARKETS.map(function (m) { return { value: m, label: t(m) }; }), v.market, null) + '</div>' +
+            '<div class="field"><label>' + t('Arah') + '</label>' +
               selectHtml('tSide', [
-                { value: 'long', label: 'Long / Buy' },
-                { value: 'short', label: 'Short / Sell' }
+                { value: 'long', label: t('Long / Buy') },
+                { value: 'short', label: t('Short / Sell') }
               ], v.side, null) + '</div>' +
           '</div>' +
           '<div class="form-row-3">' +
-            '<div class="field"><label>Waktu entry</label>' +
+            '<div class="field"><label>' + t('Waktu entry') + '</label>' +
               '<input type="datetime-local" id="tEntryDate" value="' + esc(v.entryDate) + '"></div>' +
-            '<div class="field"><label>Waktu exit</label>' +
+            '<div class="field"><label>' + t('Waktu exit') + '</label>' +
               '<input type="datetime-local" id="tExitDate" value="' + esc(v.exitDate) + '"></div>' +
-            '<div class="field"><label>Status posisi</label>' +
+            '<div class="field"><label>' + t('Status posisi') + '</label>' +
               selectHtml('tStatus', [
-                { value: 'closed', label: 'Selesai (closed)' },
-                { value: 'open', label: 'Masih terbuka' }
+                { value: 'closed', label: t('Selesai (closed)') },
+                { value: 'open', label: t('Masih terbuka') }
               ], v.status, null) + '</div>' +
           '</div>' +
         '</fieldset>' +
 
-        '<fieldset><legend>Harga dan Ukuran Posisi</legend>' +
+        '<fieldset><legend>' + t('Harga dan Ukuran Posisi') + '</legend>' +
           '<div class="form-row-3">' +
-            '<div class="field"><label>Harga entry</label>' +
+            '<div class="field"><label>' + t('Harga entry') + '</label>' +
               '<input type="number" step="any" id="tEntryPrice" value="' + esc(v.entryPrice) + '"></div>' +
-            '<div class="field"><label>Harga exit</label>' +
+            '<div class="field"><label>' + t('Harga exit') + '</label>' +
               '<input type="number" step="any" id="tExitPrice" value="' + esc(v.exitPrice) + '"></div>' +
-            '<div class="field"><label>Lot / Ukuran</label>' +
+            '<div class="field"><label>' + t('Lot / Ukuran') + '</label>' +
               '<input type="number" step="any" id="tLot" value="' + esc(v.lot) + '"></div>' +
           '</div>' +
           '<div class="form-row-3">' +
-            '<div class="field"><label>Stop Loss</label>' +
+            '<div class="field"><label>' + t('Stop Loss') + '</label>' +
               '<input type="number" step="any" id="tSL" value="' + esc(v.sl) + '"></div>' +
-            '<div class="field"><label>Take Profit</label>' +
+            '<div class="field"><label>' + t('Take Profit') + '</label>' +
               '<input type="number" step="any" id="tTP" value="' + esc(v.tp) + '"></div>' +
-            '<div class="field"><label>Pips / Poin</label>' +
+            '<div class="field"><label>' + t('Pips / Poin') + '</label>' +
               '<input type="number" step="any" id="tPips" value="' + esc(v.pips) + '"></div>' +
           '</div>' +
         '</fieldset>' +
 
-        '<fieldset><legend>Risiko dan Hasil</legend>' +
+        '<fieldset><legend>' + t('Risiko dan Hasil') + '</legend>' +
           '<div class="form-row-3">' +
-            '<div class="field"><label>Risiko (' + esc(state.settings.currency) + ')</label>' +
+            '<div class="field"><label>' + t('Risiko ({c})', { c: state.settings.currency }) + '</label>' +
               '<input type="number" step="any" id="tRisk" value="' + esc(v.risk) + '"></div>' +
-            '<div class="field"><label>PnL / Hasil (' + esc(state.settings.currency) + ')</label>' +
+            '<div class="field"><label>' + t('PnL / Hasil ({c})', { c: state.settings.currency }) + '</label>' +
               '<input type="number" step="any" id="tPnl" value="' + esc(v.pnl) + '"></div>' +
-            '<div class="field"><label>R Multiple</label>' +
-              '<input type="number" step="0.01" id="tR" placeholder="otomatis dari risiko">' +
+            '<div class="field"><label>' + t('R Multiple') + '</label>' +
+              '<input type="number" step="0.01" id="tR" placeholder="' + t('otomatis dari risiko') + '">' +
               '<div class="hint" id="rPreview"></div></div>' +
           '</div>' +
         '</fieldset>' +
 
-        '<fieldset><legend>Setup dan Kualitas</legend>' +
+        '<fieldset><legend>' + t('Setup dan Kualitas') + '</legend>' +
           '<div class="form-row">' +
-            '<div class="field"><label>Setup / Strategy</label>' +
+            '<div class="field"><label>' + t('Setup / Strategy') + '</label>' +
               '<select id="tSetup">' + setupOptions(v.setupId) + '</select></div>' +
-            '<div class="field"><label>Tag (pisahkan dengan koma)</label>' +
+            '<div class="field"><label>' + t('Tag (pisahkan dengan koma)') + '</label>' +
               '<input type="text" id="tTags" placeholder="breakout, pullback, fomo" value="' +
               esc(tagsStr) + '"></div>' +
           '</div>' +
           '<div class="form-row-3">' +
-            '<div class="field"><label>Kualitas eksekusi</label>' +
-              selectHtml('tQuality', ['1', '2', '3', '4', '5'], v.quality ? String(v.quality) : '', 'Belum dinilai') + '</div>' +
-            '<div class="field"><label>Mood</label>' +
-              selectHtml('tMood', MOODS, v.mood) + '</div>' +
-            '<div class="field"><label>Disiplin pada rencana</label>' +
+            '<div class="field"><label>' + t('Kualitas eksekusi') + '</label>' +
+              selectHtml('tQuality', ['1', '2', '3', '4', '5'], v.quality ? String(v.quality) : '', t('Belum dinilai')) + '</div>' +
+            '<div class="field"><label>' + t('Mood') + '</label>' +
+              selectHtml('tMood', MOODS.map(function (m) { return { value: m, label: t(m) }; }), v.mood) + '</div>' +
+            '<div class="field"><label>' + t('Disiplin pada rencana') + '</label>' +
               selectHtml('tDisciplined', [
-                { value: 'ya', label: 'Ya, disiplin' },
-                { value: 'tidak', label: 'Tidak, melanggar' }
+                { value: 'ya', label: t('Ya, disiplin') },
+                { value: 'tidak', label: t('Tidak, melanggar') }
               ], v.disciplined ? 'ya' : '') + '</div>' +
           '</div>' +
           '<div id="setupChecklist"></div>' +
         '</fieldset>' +
 
-        '<fieldset><legend>Catatan dan Screenshot</legend>' +
-          '<div class="field"><label>Catatan / Pelajaran</label>' +
-            '<textarea id="tNotes" placeholder="Apa yang terjadi, apa yang dipelajari...">' +
+        '<fieldset><legend>' + t('Catatan dan Screenshot') + '</legend>' +
+          '<div class="field"><label>' + t('Catatan / Pelajaran') + '</label>' +
+            '<textarea id="tNotes" placeholder="' + t('Apa yang terjadi, apa yang dipelajari...') + '">' +
             esc(v.notes) + '</textarea></div>' +
-          '<div class="field"><label>Screenshot chart</label>' +
+          '<div class="field"><label>' + t('Screenshot chart') + '</label>' +
             '<input type="file" id="tShot" accept="image/*">' +
             '<div id="shotPreview"></div>' +
           '</div>' +
@@ -683,9 +683,9 @@ function openTradeModal(id) {
       '</form>' +
     '</div>' +
     '<div class="modal-foot">' +
-      (t ? '<button class="btn btn-danger left" id="delTrade" type="button">Hapus Trade</button>' : '') +
-      '<button class="btn btn-ghost" data-close type="button">Batal</button>' +
-      '<button class="btn btn-primary" id="saveTrade" type="button">Simpan Trade</button>' +
+      (tr ? '<button class="btn btn-danger left" id="delTrade" type="button">' + t('Hapus Trade') + '</button>' : '') +
+      '<button class="btn btn-ghost" data-close type="button">' + t('Batal') + '</button>' +
+      '<button class="btn btn-primary" id="saveTrade" type="button">' + t('Simpan Trade') + '</button>' +
     '</div>' +
   '</div>';
 
@@ -700,8 +700,8 @@ function openTradeModal(id) {
     var pnl = Number($('#tPnl').value) || 0;
     var r = risk !== 0 ? pnl / risk : 0;
     $('#rPreview').textContent = risk !== 0
-      ? 'Hasil: ' + (r >= 0 ? '+' : '') + r.toFixed(2) + 'R'
-      : 'Isi risiko untuk menghitung R';
+      ? t('Hasil: {r}R', { r: (r >= 0 ? '+' : '') + r.toFixed(2) })
+      : t('Isi risiko untuk menghitung R');
     return r;
   };
   $('#tRisk').addEventListener('input', updateRPreview);
@@ -734,14 +734,13 @@ function openTradeModal(id) {
       box.innerHTML = '';
       return;
     }
-    box.innerHTML = '<div class="field"><label>Checklist pre-trade: ' +
-      esc(setup.name) + '</label><div class="check-list">' +
+    box.innerHTML = '<div class="field"><label>' + t('Checklist pre-trade: {name}', { name: esc(setup.name) }) + '</label><div class="check-list">' +
       setup.checklist.map(function (c, i) {
         return '<div class="check-item">' +
           '<input type="checkbox" id="sc_' + i + '">' +
           '<label for="sc_' + i + '">' + esc(c) + '</label></div>';
       }).join('') + '</div>' +
-      '<div class="hint">Centang bila syarat ini terpenuhi sebelum entry.</div></div>';
+      '<div class="hint">' + t('Centang bila syarat ini terpenuhi sebelum entry.') + '</div></div>';
   };
   $('#tSetup').addEventListener('change', renderChecklist);
   renderChecklist();
@@ -752,7 +751,7 @@ function openTradeModal(id) {
     if (!pendingShot) { box.innerHTML = ''; return; }
     box.innerHTML = '<div class="shot-preview">' +
       '<img src="' + pendingShot + '" alt="Screenshot chart">' +
-      '<button type="button" class="rm" id="rmShot">Hapus</button></div>';
+      '<button type="button" class="rm" id="rmShot">' + t('Hapus') + '</button></div>';
     $('#rmShot').addEventListener('click', function () {
       pendingShot = '';
       $('#tShot').value = '';
@@ -773,16 +772,16 @@ function openTradeModal(id) {
   $('#saveTrade').addEventListener('click', function () {
     var symbol = $('#tSymbol').value.trim();
     if (!symbol) {
-      toast('Simbol wajib diisi', 'err');
+      toast(t('Simbol wajib diisi'), 'err');
       $('#tSymbol').focus();
       return;
     }
 
     var btn = $('#saveTrade');
     btn.disabled = true;
-    btn.textContent = 'Menyimpan...';
+    btn.textContent = t('Menyimpan...');
 
-    var newId = t ? t.id : uid('tr');
+    var newId = tr ? tr.id : uid('tr');
 
     var finish = function () {
       var isOpen = $('#tStatus').value === 'open';
@@ -812,12 +811,12 @@ function openTradeModal(id) {
         screenshot: pendingShot
       };
 
-      if (t) TradeStore.update(state, t.id, data);
+      if (tr) TradeStore.update(state, tr.id, data);
       else TradeStore.add(state, data);
 
       closeModal();
       refresh();
-      toast(t ? 'Trade diperbarui' : 'Trade tersimpan', 'ok');
+      toast(tr ? t('Trade diperbarui') : t('Trade tersimpan'), 'ok');
     };
 
     // Mode cloud: unggah screenshot ke Storage dulu agar tersinkron.
@@ -825,7 +824,7 @@ function openTradeModal(id) {
         pendingShot && pendingShot.indexOf('data:') === 0) {
       Cloud.uploadShot(pendingShot, newId).then(function (url) {
         if (url) pendingShot = url;
-        else toast('Screenshot gagal diunggah, tersimpan lokal saja', 'err');
+        else toast(t('Screenshot gagal diunggah, tersimpan lokal saja'), 'err');
         finish();
       });
     } else {
@@ -833,14 +832,14 @@ function openTradeModal(id) {
     }
   });
 
-  if (t) {
+  if (tr) {
     $('#delTrade').addEventListener('click', function () {
-      confirmDialog('Hapus trade', 'Hapus trade ' + t.symbol + ' ini?',
+      confirmDialog(t('Hapus trade'), t('Hapus trade {sym} ini?', { sym: tr.symbol }),
         function () {
-          TradeStore.remove(state, t.id);
+          TradeStore.remove(state, tr.id);
           closeModal();
           refresh();
-          toast('Trade dihapus');
+          toast(t('Trade dihapus'));
         });
     });
   }
@@ -860,15 +859,15 @@ function compressImage(file, cb) {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       var out = canvas.toDataURL('image/jpeg', 0.72);
       if (out.length > 900000) {
-        toast('Ukuran gambar masih besar, kualitas dikurangi', 'err');
+        toast(t('Ukuran gambar masih besar, kualitas dikurangi'), 'err');
         out = canvas.toDataURL('image/jpeg', 0.45);
       }
       cb(out);
     };
-    img.onerror = function () { toast('Gambar tidak bisa dibaca', 'err'); };
+    img.onerror = function () { toast(t('Gambar tidak bisa dibaca'), 'err'); };
     img.src = e.target.result;
   };
-  reader.onerror = function () { toast('Gambar tidak bisa dibaca', 'err'); };
+  reader.onerror = function () { toast(t('Gambar tidak bisa dibaca'), 'err'); };
   reader.readAsDataURL(file);
 }
 
@@ -894,15 +893,15 @@ function renderCalendar() {
     }
   });
 
-  var dowNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+  var dowNames = shortDowNames();
   var html = '<div class="card">' +
     '<div class="cal-head">' +
-      '<button class="btn btn-ghost btn-sm" id="calPrev" type="button">Bulan Sebelumnya</button>' +
+      '<button class="btn btn-ghost btn-sm" id="calPrev" type="button">' + t('Bulan Sebelumnya') + '</button>' +
       '<div class="cal-title">' + monthLabel(monthKey) +
         ' <span class="muted small">- ' + monthTrades + ' trade, ' +
         '<b class="' + signClass(monthPnl) + '">' +
         esc(fmtSigned(state.settings.currency, monthPnl)) + '</b></span></div>' +
-      '<button class="btn btn-ghost btn-sm" id="calNext" type="button">Bulan Berikutnya</button>' +
+      '<button class="btn btn-ghost btn-sm" id="calNext" type="button">' + t('Bulan Berikutnya') + '</button>' +
     '</div>' +
     '<div class="cal-grid">';
 
@@ -936,10 +935,10 @@ function renderCalendar() {
 
   html += '</div>' +
     '<div class="cal-legend">' +
-      '<span><i class="sw-win"></i>Profit</span>' +
-      '<span><i class="sw-loss"></i>Rugi</span>' +
-      '<span><i class="sw-flat"></i>Impas / belum untung rugi</span>' +
-      '<span><i class="sw-none"></i>Tidak ada trade</span>' +
+      '<span><i class="sw-win"></i>' + t('Profit') + '</span>' +
+      '<span><i class="sw-loss"></i>' + t('Rugi') + '</span>' +
+      '<span><i class="sw-flat"></i>' + t('Impas / belum untung rugi') + '</span>' +
+      '<span><i class="sw-none"></i>' + t('Tidak ada trade') + '</span>' +
     '</div>' +
     '</div>';
 
@@ -971,7 +970,7 @@ function openDayModal(day) {
 
   var body = trades.length
     ? '<div class="table-wrap"><table><thead><tr>' +
-        '<th>Simbol</th><th>Arah</th><th>Hasil</th><th class="num">PnL</th><th class="num">R</th>' +
+        '<th>' + t('Simbol') + '</th><th>' + t('Arah') + '</th><th>' + t('Hasil') + '</th><th class="num">' + t('PnL') + '</th><th class="num">' + t('R') + '</th>' +
         '</tr></thead><tbody>' +
         trades.map(function (t) {
           return '<tr><td><b>' + esc(t.symbol) + '</b></td>' +
@@ -985,25 +984,25 @@ function openDayModal(day) {
             '</td></tr>';
         }).join('') +
         '</tbody></table></div>'
-    : '<p class="muted" style="margin:0">Tidak ada trade pada tanggal ini.</p>';
+    : '<p class="muted" style="margin:0">' + t('Tidak ada trade pada tanggal ini.') + '</p>';
 
   openModal(
     '<div class="modal modal-md">' +
       '<div class="modal-head"><h2>' + esc(shortDate(day)) + '</h2>' +
-      '<button class="btn-icon" data-close type="button">Tutup</button></div>' +
+      '<button class="btn-icon" data-close type="button">' + t('Tutup') + '</button></div>' +
       '<div class="modal-body">' +
         (trades.length
           ? '<div class="alert ' + (pnl >= 0 ? 'info' : 'danger') + '">' +
-            '<strong>Total hari ini</strong>' +
+            '<strong>' + t('Total hari ini') + '</strong>' +
             '<span class="' + signClass(pnl) + '">' +
-            esc(fmtSigned(state.settings.currency, pnl)) + '</span> dari ' +
-            trades.length + ' trade</div>'
+            esc(fmtSigned(state.settings.currency, pnl)) + '</span> ' +
+            t('dari {n} trade', { n: trades.length }) + '</div>'
           : '') +
         body +
       '</div>' +
       '<div class="modal-foot">' +
-        '<button class="btn btn-ghost" data-close type="button">Tutup</button>' +
-        '<button class="btn btn-primary" id="dayAdd" type="button">Tambah Trade Hari Ini</button>' +
+        '<button class="btn btn-ghost" data-close type="button">' + t('Tutup') + '</button>' +
+        '<button class="btn btn-primary" id="dayAdd" type="button">' + t('Tambah Trade Hari Ini') + '</button>' +
       '</div>' +
     '</div>'
   );
@@ -1042,43 +1041,43 @@ function renderAnalytics() {
   var html = '';
 
   html += '<div class="card section"><div class="filters">' +
-    '<div class="field w-sm"><label>Dari</label>' +
+    '<div class="field w-sm"><label>' + t('Dari') + '</label>' +
       '<input type="date" id="aFrom" value="' + esc(analyticsFilters.from) + '"></div>' +
-    '<div class="field w-sm"><label>Sampai</label>' +
+    '<div class="field w-sm"><label>' + t('Sampai') + '</label>' +
       '<input type="date" id="aTo" value="' + esc(analyticsFilters.to) + '"></div>' +
-    '<div class="field w-sm"><label>Simbol</label>' +
+    '<div class="field w-sm"><label>' + t('Simbol') + '</label>' +
       selectHtml('aSymbol', allSymbols, analyticsFilters.symbol) + '</div>' +
-    '<div class="field w-sm"><label>Arah</label>' +
+    '<div class="field w-sm"><label>' + t('Arah') + '</label>' +
       selectHtml('aSide', [
-        { value: 'long', label: 'Long' },
-        { value: 'short', label: 'Short' }
+        { value: 'long', label: t('Long') },
+        { value: 'short', label: t('Short') }
       ], analyticsFilters.side) + '</div>' +
-    '<div class="field w-md"><label>Setup</label>' +
+    '<div class="field w-md"><label>' + t('Setup') + '</label>' +
       selectHtml('aSetup', state.setups.map(function (x) {
         return { value: x.id, label: x.name };
       }), analyticsFilters.setup) + '</div>' +
-    '<div class="field w-sm"><label>Hasil</label>' +
+    '<div class="field w-sm"><label>' + t('Hasil') + '</label>' +
       selectHtml('aResult', [
-        { value: 'win', label: 'Win' },
-        { value: 'loss', label: 'Loss' },
-        { value: 'be', label: 'Breakeven' },
-        { value: 'open', label: 'Open' }
+        { value: 'win', label: t('Win') },
+        { value: 'loss', label: t('Loss') },
+        { value: 'be', label: t('Breakeven') },
+        { value: 'open', label: t('Open') }
       ], analyticsFilters.result) + '</div>' +
-    '<div class="field w-sm"><label>Tag</label>' +
+    '<div class="field w-sm"><label>' + t('Tag') + '</label>' +
       selectHtml('aTag', allTags, analyticsFilters.tag) + '</div>' +
-    '<button class="btn btn-ghost" id="aReset" type="button">Reset</button>' +
+    '<button class="btn btn-ghost" id="aReset" type="button">' + t('Reset') + '</button>' +
   '</div>' +
 
   '<div class="grid g-4">' +
-    statCard('Total PnL', esc(fmtSigned(cur, s.totalPnl)),
-      s.closedCount + ' trade selesai', signClass(s.totalPnl)) +
-    statCard('Win rate', s.winRate.toFixed(1) + '%',
-      s.wins + ' win / ' + s.losses + ' loss') +
-    statCard('Expectancy', esc(fmtSigned(cur, s.expectancy)),
-      'Rata-rata ' + (s.avgR >= 0 ? '+' : '') + s.avgR.toFixed(2) + 'R per trade',
+    statCard(t('Total PnL'), esc(fmtSigned(cur, s.totalPnl)),
+      t('{n} trade selesai', { n: s.closedCount }), signClass(s.totalPnl)) +
+    statCard(t('Win rate'), s.winRate.toFixed(1) + '%',
+      t('{w} win / {l} loss', { w: s.wins, l: s.losses })) +
+    statCard(t('Expectancy'), esc(fmtSigned(cur, s.expectancy)),
+      t('Rata-rata {r}R per trade', { r: (s.avgR >= 0 ? '+' : '') + s.avgR.toFixed(2) }),
       signClass(s.expectancy)) +
-    statCard('Max Drawdown', esc(fmtMoney(cur, s.maxDrawdown)),
-      s.maxDrawdownPct.toFixed(1) + '% dari puncak', 'neg') +
+    statCard(t('Max Drawdown'), esc(fmtMoney(cur, s.maxDrawdown)),
+      t('{v}% dari puncak', { v: s.maxDrawdownPct.toFixed(1) }), 'neg') +
   '</div></div>';
 
   // Grafik utama
@@ -1086,15 +1085,15 @@ function renderAnalytics() {
   var rDist = Stats.rDistribution(closed);
 
   html += '<div class="grid g-2 section">' +
-    '<div class="card"><div class="card-head"><h2>PnL per Bulan</h2></div>' +
+    '<div class="card"><div class="card-head"><h2>' + t('PnL per Bulan') + '</h2></div>' +
       (monthly.length ? Charts.bars({
         labels: monthly.map(function (x) { return monthLabel(x.key); }),
         values: monthly.map(function (x) { return x.pnl; }),
-        format: function (v) { return (v > 0 ? '+' : '') + Math.round(v).toLocaleString('id-ID'); },
+        format: function (v) { return (v > 0 ? '+' : '') + Math.round(v).toLocaleString(numLocale()); },
         colorFn: function (v) { return v >= 0 ? '#22c55e' : '#ef4444'; }
-      }) : Charts.empty('Belum ada data')) +
+      }) : Charts.empty(t('Belum ada data'))) +
     '</div>' +
-    '<div class="card"><div class="card-head"><h2>Distribusi R Multiple</h2></div>' +
+    '<div class="card"><div class="card-head"><h2>' + t('Distribusi R Multiple') + '</h2></div>' +
       Charts.bars({
         labels: rDist.map(function (x) { return x.label; }),
         values: rDist.map(function (x) { return x.count; }),
@@ -1110,18 +1109,18 @@ function renderAnalytics() {
   var byWd = Stats.byWeekday(closed);
 
   html += '<div class="grid g-3 section">' +
-    '<div class="card"><div class="card-head"><h2>PnL per Simbol</h2></div>' +
+    '<div class="card"><div class="card-head"><h2>' + t('PnL per Simbol') + '</h2></div>' +
       Charts.hbars({
         items: bySym.map(function (x) { return { label: x.key, value: x.pnl }; }),
         format: function (v) { return fmtSigned(cur, v); }
       }) + '</div>' +
-    '<div class="card"><div class="card-head"><h2>PnL per Setup</h2></div>' +
+    '<div class="card"><div class="card-head"><h2>' + t('PnL per Setup') + '</h2></div>' +
       Charts.hbars({
         items: bySet.map(function (x) { return { label: x.key, value: x.pnl }; }),
         format: function (v) { return fmtSigned(cur, v); },
-        emptyMsg: 'Belum ada setup terpilih pada trade'
+        emptyMsg: t('Belum ada setup terpilih pada trade')
       }) + '</div>' +
-    '<div class="card"><div class="card-head"><h2>PnL per Hari Minggu</h2></div>' +
+    '<div class="card"><div class="card-head"><h2>' + t('PnL per Hari Minggu') + '</h2></div>' +
       Charts.hbars({
         items: byWd.map(function (x) { return { label: x.key, value: x.pnl }; }),
         format: function (v) { return fmtSigned(cur, v); }
@@ -1131,10 +1130,10 @@ function renderAnalytics() {
   // Tabel detail per simbol
   if (bySym.length) {
     html += '<div class="card section">' +
-      '<div class="card-head"><h2>Detail Performa per Simbol</h2></div>' +
+      '<div class="card-head"><h2>' + t('Detail Performa per Simbol') + '</h2></div>' +
       '<div class="table-wrap"><table><thead><tr>' +
-        '<th>Simbol</th><th class="num">Trade</th><th class="num">Win Rate</th>' +
-        '<th class="num">Risiko</th><th class="num">PnL</th><th class="num">Rata-rata R</th>' +
+        '<th>' + t('Simbol') + '</th><th class="num">' + t('Trade') + '</th><th class="num">' + t('Win Rate') + '</th>' +
+        '<th class="num">' + t('Risiko') + '</th><th class="num">' + t('PnL') + '</th><th class="num">' + t('Rata-rata R') + '</th>' +
       '</tr></thead><tbody>' +
       bySym.map(function (x) {
         return '<tr><td><b>' + esc(x.key) + '</b></td>' +
@@ -1155,38 +1154,38 @@ function renderAnalytics() {
   var byTag = Stats.byTag(closed);
 
   html += '<div class="grid g-2 section">' +
-    '<div class="card"><div class="card-head"><h2>PnL per Jam Entry</h2></div>' +
+    '<div class="card"><div class="card-head"><h2>' + t('PnL per Jam Entry') + '</h2></div>' +
       (byHour.length ? Charts.bars({
         labels: byHour.map(function (x) { return x.key; }),
         values: byHour.map(function (x) { return x.pnl; }),
-        format: function (v) { return (v > 0 ? '+' : '') + Math.round(v).toLocaleString('id-ID'); },
+        format: function (v) { return (v > 0 ? '+' : '') + Math.round(v).toLocaleString(numLocale()); },
         colorFn: function (v) { return v >= 0 ? '#22c55e' : '#ef4444'; },
         height: 190
-      }) : Charts.empty('Belum ada jam entry tercatat')) + '</div>' +
-    '<div class="card"><div class="card-head"><h2>PnL per Mood</h2></div>' +
+      }) : Charts.empty(t('Belum ada jam entry tercatat'))) + '</div>' +
+    '<div class="card"><div class="card-head"><h2>' + t('PnL per Mood') + '</h2></div>' +
       (byMood.length ? Charts.hbars({
-        items: byMood.map(function (x) { return { label: x.key, value: x.pnl }; }),
+        items: byMood.map(function (x) { return { label: t(x.key), value: x.pnl }; }),
         format: function (v) { return fmtSigned(cur, v); }
-      }) : Charts.empty('Belum ada mood tercatat')) + '</div>' +
+      }) : Charts.empty(t('Belum ada mood tercatat'))) + '</div>' +
     '</div>';
 
   html += '<div class="grid g-2 section">' +
-    '<div class="card"><div class="card-head"><h2>Kualitas Eksekusi vs Hasil</h2></div>' +
+    '<div class="card"><div class="card-head"><h2>' + t('Kualitas Eksekusi vs Hasil') + '</h2></div>' +
       '<div class="table-wrap"><table><thead><tr>' +
-        '<th>Penilaian</th><th class="num">Trade</th><th class="num">Win Rate</th>' +
-        '<th class="num">PnL</th></tr></thead><tbody>' +
+        '<th>' + t('Penilaian') + '</th><th class="num">' + t('Trade') + '</th><th class="num">' + t('Win Rate') + '</th>' +
+        '<th class="num">' + t('PnL') + '</th></tr></thead><tbody>' +
         byQuality.map(function (x) {
-          return '<tr><td>' + esc(x.key) + '</td>' +
+          return '<tr><td>' + esc(t(x.key)) + '</td>' +
             '<td class="num">' + x.count + '</td>' +
             '<td class="num">' + x.winRate.toFixed(1) + '%</td>' +
             '<td class="num ' + signClass(x.pnl) + '">' +
             esc(fmtSigned(cur, x.pnl)) + '</td></tr>';
         }).join('') +
       '</tbody></table></div></div>' +
-    '<div class="card"><div class="card-head"><h2>Analisis Disiplin</h2></div>' +
+    '<div class="card"><div class="card-head"><h2>' + t('Analisis Disiplin') + '</h2></div>' +
       disciplineTable(closed, cur) +
       (byTag.length
-        ? '<h3 style="margin-top:16px">Tag paling sering</h3>' +
+        ? '<h3 style="margin-top:16px">' + t('Tag paling sering') + '</h3>' +
           Charts.hbars({
             items: byTag.slice(0, 8).map(function (x) {
               return { label: x.key + ' (' + x.count + ')', value: x.pnl };
@@ -1200,18 +1199,17 @@ function renderAnalytics() {
   // Pelanggaran aturan
   var violations = Stats.violations(state);
   html += '<div class="card">' +
-    '<div class="card-head"><h2>Pelanggaran Aturan Risk Management</h2>' +
+    '<div class="card-head"><h2>' + t('Pelanggaran Aturan Risk Management') + '</h2>' +
     '<span class="badge ' + (violations.length ? 'rule' : 'win') + '">' +
-    violations.length + ' temuan</span></div>';
+    t('{n} temuan', { n: violations.length }) + '</span></div>';
 
   if (!violations.length) {
-    html += '<p class="muted" style="margin:0">Tidak ada pelanggaran aturan tercatat. ' +
-      'Pertahankan disiplin.</p>';
+    html += '<p class="muted" style="margin:0">' + t('Tidak ada pelanggaran aturan tercatat. Pertahankan disiplin.') + '</p>';
   } else {
     html += '<div class="table-wrap"><table><thead><tr>' +
-      '<th>Jenis</th><th>Keterangan</th></tr></thead><tbody>' +
+      '<th>' + t('Jenis') + '</th><th>' + t('Keterangan') + '</th></tr></thead><tbody>' +
       violations.slice(0, 40).map(function (v) {
-        return '<tr><td><span class="badge rule">' + esc(v.type) + '</span></td>' +
+        return '<tr><td><span class="badge rule">' + esc(t(v.type)) + '</span></td>' +
           '<td class="wrap">' + esc(v.detail) + '</td></tr>';
       }).join('') + '</tbody></table></div>';
   }
@@ -1239,8 +1237,8 @@ function renderAnalytics() {
 
 function disciplineTable(trades, cur) {
   var groups = [
-    { key: 'Disiplin', test: function (t) { return t.disciplined; } },
-    { key: 'Melanggar rencana', test: function (t) { return !t.disciplined; } }
+    { key: t('Disiplin'), test: function (t) { return t.disciplined; } },
+    { key: t('Melanggar rencana'), test: function (t) { return !t.disciplined; } }
   ];
 
   var rows = groups.map(function (g) {
@@ -1269,18 +1267,16 @@ function renderPlaybook() {
   var html = '';
 
   html += '<div class="card section">' +
-    '<div class="card-head"><h2>Daftar Setup Trading</h2>' +
-      '<button class="btn btn-primary" id="addSetup" type="button">Tambah Setup</button></div>' +
-    '<p class="muted small" style="margin:0">Kumpulkan setup yang sudah terbukti, ' +
-    'lengkapi dengan syarat entry dan checklist wajib agar eksekusi konsisten.</p>' +
+    '<div class="card-head"><h2>' + t('Daftar Setup Trading') + '</h2>' +
+      '<button class="btn btn-primary" id="addSetup" type="button">' + t('Tambah Setup') + '</button></div>' +
+    '<p class="muted small" style="margin:0">' + t('Kumpulkan setup yang sudah terbukti, lengkapi dengan syarat entry dan checklist wajib agar eksekusi konsisten.') + '</p>' +
     '</div>';
 
   if (!state.setups.length) {
     html += '<div class="empty">' +
-      '<div class="title">Belum ada setup</div>' +
-      '<div class="desc">Tulis setup pertama Anda, misalnya Pullback Trend atau Breakout Retest, ' +
-      'lengkap dengan aturan entry, exit, dan checklist pre-trade.</div>' +
-      '<button class="btn btn-primary" id="addSetupEmpty">Tambah Setup Pertama</button>' +
+      '<div class="title">' + t('Belum ada setup') + '</div>' +
+      '<div class="desc">' + t('Tulis setup pertama Anda, misalnya Pullback Trend atau Breakout Retest, lengkap dengan aturan entry, exit, dan checklist pre-trade.') + '</div>' +
+      '<button class="btn btn-primary" id="addSetupEmpty">' + t('Tambah Setup Pertama') + '</button>' +
       '</div>';
     $('#view').innerHTML = html;
     $('#addSetup').addEventListener('click', function () { openSetupModal(); });
@@ -1299,24 +1295,24 @@ function renderPlaybook() {
     html += '<div class="setup-card">' +
       '<div class="name">' + esc(s.name) + '</div>' +
       (s.description ? '<div class="desc">' + esc(s.description) + '</div>' : '') +
-      (s.entryRules ? '<div class="small"><b>Syarat entry:</b><br>' +
+      (s.entryRules ? '<div class="small"><b>' + t('Syarat entry:') + '</b><br>' +
         esc(s.entryRules).replace(/\n/g, '<br>') + '</div>' : '') +
-      (s.exitRules ? '<div class="small"><b>Aturan exit:</b><br>' +
+      (s.exitRules ? '<div class="small"><b>' + t('Aturan exit:') + '</b><br>' +
         esc(s.exitRules).replace(/\n/g, '<br>') + '</div>' : '') +
       (s.checklist && s.checklist.length
-        ? '<div class="small"><b>Checklist (' + s.checklist.length + '):</b><ul style="margin:4px 0 0;padding-left:18px">' +
+        ? '<div class="small"><b>' + t('Checklist ({n}):', { n: s.checklist.length }) + '</b><ul style="margin:4px 0 0;padding-left:18px">' +
           s.checklist.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') +
           '</ul></div>'
         : '') +
       '<div class="meta">' +
-        '<span>Trade <b>' + own.length + '</b></span>' +
-        '<span>Win rate <b>' + wr.toFixed(0) + '%</b></span>' +
-        '<span>PnL <b class="' + signClass(pnl) + '">' +
+        '<span>' + t('Trade') + ' <b>' + own.length + '</b></span>' +
+        '<span>' + t('Win rate') + ' <b>' + wr.toFixed(0) + '%</b></span>' +
+        '<span>' + t('PnL') + ' <b class="' + signClass(pnl) + '">' +
           esc(fmtSigned(state.settings.currency, pnl)) + '</b></span>' +
       '</div>' +
       '<div class="actions">' +
-        '<button class="btn btn-sm" data-setup-edit="' + esc(s.id) + '" type="button">Edit</button>' +
-        '<button class="btn btn-danger btn-sm" data-setup-del="' + esc(s.id) + '" type="button">Hapus</button>' +
+        '<button class="btn btn-sm" data-setup-edit="' + esc(s.id) + '" type="button">' + t('Edit') + '</button>' +
+        '<button class="btn btn-danger btn-sm" data-setup-del="' + esc(s.id) + '" type="button">' + t('Hapus') + '</button>' +
       '</div>' +
       '</div>';
   });
@@ -1334,12 +1330,12 @@ function renderPlaybook() {
     b.addEventListener('click', function () {
       var id = b.getAttribute('data-setup-del');
       var s = SetupStore.get(state, id);
-      confirmDialog('Hapus setup',
-        'Hapus setup "' + (s ? s.name : '') + '"? Trade yang memakai setup ini tetap tersimpan.',
+      confirmDialog(t('Hapus setup'),
+        t('Hapus setup "{name}"? Trade yang memakai setup ini tetap tersimpan.', { name: s ? s.name : '' }),
         function () {
           SetupStore.remove(state, id);
           refresh();
-          toast('Setup dihapus');
+          toast(t('Setup dihapus'));
         });
     });
   });
@@ -1354,7 +1350,7 @@ function openSetupModal(id) {
   var renderItems = function () {
     var box = $('#setupItems');
     if (!checklist.length) {
-      box.innerHTML = '<div class="hint">Belum ada item checklist.</div>';
+      box.innerHTML = '<div class="hint">' + t('Belum ada item checklist.') + '</div>';
       return;
     }
     box.innerHTML = '<div class="check-list">' + checklist.map(function (c, i) {
@@ -1375,32 +1371,32 @@ function openSetupModal(id) {
 
   openModal(
     '<div class="modal">' +
-      '<div class="modal-head"><h2>' + (s ? 'Edit Setup' : 'Tambah Setup') + '</h2>' +
-      '<button class="btn-icon" data-close type="button">Tutup</button></div>' +
+      '<div class="modal-head"><h2>' + (s ? t('Edit Setup') : t('Tambah Setup')) + '</h2>' +
+      '<button class="btn-icon" data-close type="button">' + t('Tutup') + '</button></div>' +
       '<div class="modal-body">' +
-        '<div class="field"><label>Nama setup *</label>' +
+        '<div class="field"><label>' + t('Nama setup *') + '</label>' +
           '<input type="text" id="sName" placeholder="Pullback Trend" value="' +
           esc(s ? s.name : '') + '"></div>' +
-        '<div class="field"><label>Deskripsi singkat</label>' +
-          '<textarea id="sDesc" placeholder="Kondisi pasar apa yang dicari...">' +
+        '<div class="field"><label>' + t('Deskripsi singkat') + '</label>' +
+          '<textarea id="sDesc" placeholder="' + t('Kondisi pasar apa yang dicari...') + '">' +
           esc(s ? s.description : '') + '</textarea></div>' +
         '<div class="form-row">' +
-          '<div class="field"><label>Syarat entry (satu baris satu syarat)</label>' +
+          '<div class="field"><label>' + t('Syarat entry (satu baris satu syarat)') + '</label>' +
             '<textarea id="sEntry">' + esc(s ? s.entryRules : '') + '</textarea></div>' +
-          '<div class="field"><label>Aturan exit</label>' +
+          '<div class="field"><label>' + t('Aturan exit') + '</label>' +
             '<textarea id="sExit">' + esc(s ? s.exitRules : '') + '</textarea></div>' +
         '</div>' +
-        '<div class="field"><label>Checklist pre-trade</label>' +
+        '<div class="field"><label>' + t('Checklist pre-trade') + '</label>' +
           '<div id="setupItems"></div>' +
           '<div class="add-check">' +
-            '<input type="text" id="sCheck" placeholder="Tambah syarat wajib...">' +
-            '<button class="btn" id="sAddCheck" type="button">Tambah</button>' +
+            '<input type="text" id="sCheck" placeholder="' + t('Tambah syarat wajib...') + '">' +
+            '<button class="btn" id="sAddCheck" type="button">' + t('Tambah') + '</button>' +
           '</div>' +
         '</div>' +
       '</div>' +
       '<div class="modal-foot">' +
-        '<button class="btn btn-ghost" data-close type="button">Batal</button>' +
-        '<button class="btn btn-primary" id="saveSetup" type="button">Simpan Setup</button>' +
+        '<button class="btn btn-ghost" data-close type="button">' + t('Batal') + '</button>' +
+        '<button class="btn btn-primary" id="saveSetup" type="button">' + t('Simpan Setup') + '</button>' +
       '</div>' +
     '</div>'
   );
@@ -1422,7 +1418,7 @@ function openSetupModal(id) {
 
   $('#saveSetup').addEventListener('click', function () {
     var name = $('#sName').value.trim();
-    if (!name) { toast('Nama setup wajib diisi', 'err'); $('#sName').focus(); return; }
+    if (!name) { toast(t('Nama setup wajib diisi'), 'err'); $('#sName').focus(); return; }
 
     var data = {
       name: name,
@@ -1437,7 +1433,7 @@ function openSetupModal(id) {
 
     closeModal();
     refresh();
-    toast(s ? 'Setup diperbarui' : 'Setup tersimpan', 'ok');
+    toast(s ? t('Setup diperbarui') : t('Setup tersimpan'), 'ok');
   });
 }
 
@@ -1453,57 +1449,57 @@ function renderRisk() {
   html += '<div class="grid g-2 section">' +
 
     '<div class="card">' +
-      '<div class="card-head"><h2>Aturan Risiko</h2></div>' +
-      '<div class="field"><label>Risiko maksimal per trade (%)</label>' +
+      '<div class="card-head"><h2>' + t('Aturan Risiko') + '</h2></div>' +
+      '<div class="field"><label>' + t('Risiko maksimal per trade (%)') + '</label>' +
         '<input type="number" step="0.1" id="rRiskPct" value="' + esc(set.maxRiskPctTrade) + '">' +
-        '<div class="hint">Dari modal awal, saat ini setara ' +
-        esc(fmtMoney(set.currency, set.initialCapital * set.maxRiskPctTrade / 100)) +
-        ' per trade.</div></div>' +
-      '<div class="field"><label>Batas rugi harian (%)</label>' +
+        '<div class="hint">' + t('Dari modal awal, saat ini setara {m} per trade.',
+          { m: fmtMoney(set.currency, set.initialCapital * set.maxRiskPctTrade / 100) }) +
+        '</div></div>' +
+      '<div class="field"><label>' + t('Batas rugi harian (%)') + '</label>' +
         '<input type="number" step="0.1" id="rDailyPct" value="' + esc(set.maxDailyLossPct) + '">' +
-        '<div class="hint">Saat ini setara ' +
-        esc(fmtMoney(set.currency, set.initialCapital * set.maxDailyLossPct / 100)) +
-        ' per hari.</div></div>' +
-      '<div class="field"><label>Batas rugi beruntun (kali)</label>' +
+        '<div class="hint">' + t('Saat ini setara {m} per hari.',
+          { m: fmtMoney(set.currency, set.initialCapital * set.maxDailyLossPct / 100) }) +
+        '</div></div>' +
+      '<div class="field"><label>' + t('Batas rugi beruntun (kali)') + '</label>' +
         '<input type="number" step="1" id="rStreak" value="' + esc(set.maxLossStreak) + '">' +
-        '<div class="hint">Berhenti trading setelah rugi beruntun sebanyak ini.</div></div>' +
-      '<button class="btn btn-primary" id="saveRules" type="button">Simpan Aturan</button>' +
+        '<div class="hint">' + t('Berhenti trading setelah rugi beruntun sebanyak ini.') + '</div></div>' +
+      '<button class="btn btn-primary" id="saveRules" type="button">' + t('Simpan Aturan') + '</button>' +
     '</div>' +
 
     '<div class="card">' +
-      '<div class="card-head"><h2>Trading Plan</h2></div>' +
-      '<div class="field"><label>Target / Tujuan</label>' +
-        '<textarea id="pGoal" placeholder="Misal: naik 5% per bulan dengan drawdown maks 10%">' +
+      '<div class="card-head"><h2>' + t('Trading Plan') + '</h2></div>' +
+      '<div class="field"><label>' + t('Target / Tujuan') + '</label>' +
+        '<textarea id="pGoal" placeholder="' + t('Misal: naik 5% per bulan dengan drawdown maks 10%') + '">' +
         esc(plan.goal) + '</textarea></div>' +
-      '<div class="field"><label>Simbol yang boleh diperdagangkan</label>' +
+      '<div class="field"><label>' + t('Simbol yang boleh diperdagangkan') + '</label>' +
         '<input type="text" id="pSymbols" placeholder="EURUSD, XAUUSD" value="' +
         esc(plan.allowedSymbols) + '"></div>' +
-      '<div class="field"><label>Jam trading yang diizinkan</label>' +
+      '<div class="field"><label>' + t('Jam trading yang diizinkan') + '</label>' +
         '<input type="text" id="pHours" placeholder="08:00 - 11:00 WIB" value="' +
         esc(plan.allowedHours) + '"></div>' +
-      '<div class="field"><label>Aturan dan larangan</label>' +
-        '<textarea id="pRules" placeholder="Satu baris satu aturan">' +
+      '<div class="field"><label>' + t('Aturan dan larangan') + '</label>' +
+        '<textarea id="pRules" placeholder="' + t('Satu baris satu aturan') + '">' +
         esc(plan.rules) + '</textarea></div>' +
-      '<button class="btn btn-primary" id="savePlan" type="button">Simpan Plan</button>' +
+      '<button class="btn btn-primary" id="savePlan" type="button">' + t('Simpan Plan') + '</button>' +
     '</div>' +
     '</div>';
 
   // Checklist sesi
   html += '<div class="grid g-2">' +
     '<div class="card">' +
-      '<div class="card-head"><h2>Checklist Sebelum Sesi</h2></div>' +
+      '<div class="card-head"><h2>' + t('Checklist Sebelum Sesi') + '</h2></div>' +
       '<div class="check-list" id="preList">' + checklistHtml(state.sessionChecklist) + '</div>' +
       '<div class="add-check">' +
-        '<input type="text" id="preInput" placeholder="Tambah item checklist...">' +
-        '<button class="btn" id="preAdd" type="button">Tambah</button>' +
+        '<input type="text" id="preInput" placeholder="' + t('Tambah item checklist...') + '">' +
+        '<button class="btn" id="preAdd" type="button">' + t('Tambah') + '</button>' +
       '</div>' +
     '</div>' +
     '<div class="card">' +
-      '<div class="card-head"><h2>Checklist Setelah Sesi</h2></div>' +
+      '<div class="card-head"><h2>' + t('Checklist Setelah Sesi') + '</h2></div>' +
       '<div class="check-list" id="postList">' + checklistHtml(state.postChecklist) + '</div>' +
       '<div class="add-check">' +
-        '<input type="text" id="postInput" placeholder="Tambah item checklist...">' +
-        '<button class="btn" id="postAdd" type="button">Tambah</button>' +
+        '<input type="text" id="postInput" placeholder="' + t('Tambah item checklist...') + '">' +
+        '<button class="btn" id="postAdd" type="button">' + t('Tambah') + '</button>' +
       '</div>' +
     '</div>' +
     '</div>';
@@ -1511,15 +1507,15 @@ function renderRisk() {
   // Ringkasan pelanggaran
   var violations = Stats.violations(state);
   html += '<div class="card" style="margin-top:16px">' +
-    '<div class="card-head"><h2>Riwayat Pelanggaran</h2>' +
+    '<div class="card-head"><h2>' + t('Riwayat Pelanggaran') + '</h2>' +
     '<span class="badge ' + (violations.length ? 'rule' : 'win') + '">' +
-    violations.length + ' temuan</span></div>' +
+    t('{n} temuan', { n: violations.length }) + '</span></div>' +
     (violations.length
       ? '<ul class="small" style="margin:0;padding-left:18px;line-height:1.9">' +
         violations.slice(0, 15).map(function (v) {
-          return '<li><b>' + esc(v.type) + ':</b> ' + esc(v.detail) + '</li>';
+          return '<li><b>' + esc(t(v.type)) + ':</b> ' + esc(v.detail) + '</li>';
         }).join('') + '</ul>'
-      : '<p class="muted small" style="margin:0">Belum ada pelanggaran.</p>') +
+      : '<p class="muted small" style="margin:0">' + t('Belum ada pelanggaran.') + '</p>') +
     '</div>';
 
   $('#view').innerHTML = html;
@@ -1529,7 +1525,7 @@ function renderRisk() {
     set.maxDailyLossPct = Math.max(0, Number($('#rDailyPct').value) || 0);
     set.maxLossStreak = Math.max(0, Math.round(Number($('#rStreak').value) || 0));
     refresh();
-    toast('Aturan risiko disimpan', 'ok');
+    toast(t('Aturan risiko disimpan'), 'ok');
   });
 
   $('#savePlan').addEventListener('click', function () {
@@ -1538,7 +1534,7 @@ function renderRisk() {
     plan.allowedHours = $('#pHours').value.trim();
     plan.rules = $('#pRules').value.trim();
     refresh();
-    toast('Trading plan disimpan', 'ok');
+    toast(t('Trading plan disimpan'), 'ok');
   });
 
   bindChecklist('preList', 'preInput', 'preAdd', state.sessionChecklist);
@@ -1613,63 +1609,61 @@ function renderSettings() {
   var html = '<div class="grid g-2 section">' +
 
     '<div class="card">' +
-      '<div class="card-head"><h2>Profil Modal</h2></div>' +
-      '<div class="field"><label>Modal awal</label>' +
+      '<div class="card-head"><h2>' + t('Profil Modal') + '</h2></div>' +
+      '<div class="field"><label>' + t('Modal awal') + '</label>' +
         '<input type="number" step="any" id="setCapital" value="' + esc(set.initialCapital) + '"></div>' +
-      '<div class="field"><label>Simbol mata uang</label>' +
+      '<div class="field"><label>' + t('Simbol mata uang') + '</label>' +
         '<input type="text" id="setCurrency" maxlength="4" value="' + esc(set.currency) + '">' +
-        '<div class="hint">Contoh: $ atau Rp</div></div>' +
-      '<button class="btn btn-primary" id="saveSettings" type="button">Simpan</button>' +
+        '<div class="hint">' + t('Contoh: $ atau Rp') + '</div></div>' +
+      '<button class="btn btn-primary" id="saveSettings" type="button">' + t('Simpan') + '</button>' +
     '</div>' +
 
     '<div class="card">' +
-      '<div class="card-head"><h2>Statistik Data</h2></div>' +
+      '<div class="card-head"><h2>' + t('Statistik Data') + '</h2></div>' +
       '<div class="kv">' +
-        '<dt>Total trade</dt><dd>' + state.trades.length + '</dd>' +
-        '<dt>Posisi terbuka</dt><dd>' + openCount + '</dd>' +
-        '<dt>Jumlah setup</dt><dd>' + state.setups.length + '</dd>' +
-        '<dt>Checklist sesi</dt><dd>' + state.sessionChecklist.length + ' sebelum, ' +
-          state.postChecklist.length + ' sesudah</dd>' +
-        '<dt>Perkiraan ukuran data</dt><dd>' + estimateSize() + '</dd>' +
+        '<dt>' + t('Total trade') + '</dt><dd>' + state.trades.length + '</dd>' +
+        '<dt>' + t('Posisi terbuka') + '</dt><dd>' + openCount + '</dd>' +
+        '<dt>' + t('Jumlah setup') + '</dt><dd>' + state.setups.length + '</dd>' +
+        '<dt>' + t('Checklist sesi') + '</dt><dd>' + t('{a} sebelum, {b} sesudah',
+          { a: state.sessionChecklist.length, b: state.postChecklist.length }) + '</dd>' +
+        '<dt>' + t('Perkiraan ukuran data') + '</dt><dd>' + estimateSize() + '</dd>' +
       '</div>' +
-      '<p class="muted small" style="margin-top:14px">Data tersimpan di browser ini saja ' +
-      '(localStorage). Gunakan ekspor berkala agar tidak kehilangan catatan bila ' +
-      'browser dibersihkan.</p>' +
+      '<p class="muted small" style="margin-top:14px">' + t('Data tersimpan di browser ini saja (localStorage). Gunakan ekspor berkala agar tidak kehilangan catatan bila browser dibersihkan.') + '</p>' +
     '</div>' +
     '</div>';
 
   html += '<div class="card" style="margin-top:16px" id="accountCard"></div>';
 
   html += '<div class="card" style="margin-top:16px">' +
-    '<div class="card-head"><h2>Cadangan dan Pemulihan</h2></div>' +
+    '<div class="card-head"><h2>' + t('Cadangan dan Pemulihan') + '</h2></div>' +
     '<div class="grid g-3">' +
       '<div>' +
-        '<h3>Ekspor</h3>' +
-        '<p class="muted small">Unduh seluruh data sebagai berkas.</p>' +
+        '<h3>' + t('Ekspor') + '</h3>' +
+        '<p class="muted small">' + t('Unduh seluruh data sebagai berkas.') + '</p>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-          '<button class="btn" id="expJson" type="button">Ekspor JSON</button>' +
-          '<button class="btn" id="expCsv" type="button">Ekspor CSV</button>' +
+          '<button class="btn" id="expJson" type="button">' + t('Ekspor JSON') + '</button>' +
+          '<button class="btn" id="expCsv" type="button">' + t('Ekspor CSV') + '</button>' +
         '</div>' +
       '</div>' +
       '<div>' +
-        '<h3>Impor</h3>' +
-        '<p class="muted small">Memuat berkas JSON akan menimpa data saat ini.</p>' +
+        '<h3>' + t('Impor') + '</h3>' +
+        '<p class="muted small">' + t('Memuat berkas JSON akan menimpa data saat ini.') + '</p>' +
         '<input type="file" id="impFile" accept="application/json,.json">' +
       '</div>' +
       '<div>' +
-        '<h3>Reset</h3>' +
-        '<p class="muted small">Hapus semua data dan kembali ke kondisi awal.</p>' +
-        '<button class="btn btn-danger" id="resetData" type="button">Hapus Semua Data</button>' +
+        '<h3>' + t('Reset') + '</h3>' +
+        '<p class="muted small">' + t('Hapus semua data dan kembali ke kondisi awal.') + '</p>' +
+        '<button class="btn btn-danger" id="resetData" type="button">' + t('Hapus Semua Data') + '</button>' +
       '</div>' +
     '</div>' +
     '</div>';
 
   html += '<div class="card" style="margin-top:16px">' +
-    '<div class="card-head"><h2>Pintasan Keyboard</h2></div>' +
+    '<div class="card-head"><h2>' + t('Pintasan Keyboard') + '</h2></div>' +
     '<div class="kv">' +
-      '<dt>Esc</dt><dd>Tutup jendela dialog</dd>' +
-      '<dt>Tab</dt><dd>Pindah antar kolom isian</dd>' +
-      '<dt>Enter</dt><dd>Tambah item checklist</dd>' +
+      '<dt>Esc</dt><dd>' + t('Tutup jendela dialog') + '</dd>' +
+      '<dt>Tab</dt><dd>' + t('Pindah antar kolom isian') + '</dd>' +
+      '<dt>Enter</dt><dd>' + t('Tambah item checklist') + '</dd>' +
     '</div>' +
     '</div>';
 
@@ -1687,16 +1681,16 @@ function renderSettings() {
     var cur = $('#setCurrency').value.trim();
     set.currency = cur || '$';
     refresh();
-    toast('Pengaturan disimpan', 'ok');
+    toast(t('Pengaturan disimpan'), 'ok');
   });
 
   $('#expJson').addEventListener('click', function () {
     DataPort.exportJSON(state);
-    toast('Berkas JSON diunduh', 'ok');
+    toast(t('Berkas JSON diunduh'), 'ok');
   });
   $('#expCsv').addEventListener('click', function () {
     DataPort.exportCSV(state);
-    toast('Berkas CSV diunduh', 'ok');
+    toast(t('Berkas CSV diunduh'), 'ok');
   });
 
   $('#impFile').addEventListener('change', function () {
@@ -1704,32 +1698,31 @@ function renderSettings() {
     if (!file) return;
     DataPort.importJSON(file, function (err, imported) {
       if (err) {
-        toast('Berkas tidak valid: ' + err.message, 'err');
+        toast(t('Berkas tidak valid: {m}', { m: err.message }), 'err');
         return;
       }
-      confirmDialog('Impor data',
-        'Timpa semua data saat ini dengan isi berkas "' + file.name + '"? ' +
-        '(' + imported.trades.length + ' trade, ' + imported.setups.length + ' setup)',
+      confirmDialog(t('Impor data'),
+        t('Timpa semua data saat ini dengan isi berkas "{f}"? ({a} trade, {b} setup)',
+          { f: file.name, a: imported.trades.length, b: imported.setups.length }),
         function () {
           state = imported;
           refresh();
-          toast('Data berhasil diimpor', 'ok');
+          toast(t('Data berhasil diimpor'), 'ok');
         },
-        'Impor');
+        t('Impor'));
     });
     this.value = '';
   });
 
   $('#resetData').addEventListener('click', function () {
-    confirmDialog('Hapus semua data',
-      'Seluruh trade, setup, checklist, dan pengaturan akan dihapus permanen. ' +
-      'Lanjutkan?',
+    confirmDialog(t('Hapus semua data'),
+      t('Seluruh trade, setup, checklist, dan pengaturan akan dihapus permanen. Lanjutkan?'),
       function () {
         state = Storage.reset();
         refresh();
-        toast('Semua data dihapus');
+        toast(t('Semua data dihapus'));
       },
-      'Hapus Semua');
+      t('Hapus Semua'));
   });
 }
 
@@ -1739,7 +1732,36 @@ function estimateSize() {
     var kb = new Blob([raw]).size / 1024;
     return kb < 1024 ? kb.toFixed(1) + ' KB' : (kb / 1024).toFixed(2) + ' MB';
   } catch (e) {
-    return 'tidak dapat dihitung';
+    return t('tidak dapat dihitung');
+  }
+}
+
+function applyStaticTexts() {
+  var navNames = {
+    dashboard: t('Dashboard'),
+    trades: t('Log Transaksi'),
+    calendar: t('Kalender'),
+    analytics: t('Analitik'),
+    playbook: t('Playbook'),
+    risk: t('Risk & Plan'),
+    settings: t('Pengaturan')
+  };
+  $$('#nav a').forEach(function (a) {
+    var r = a.getAttribute('data-route');
+    if (navNames[r]) a.textContent = navNames[r];
+  });
+  var sub = $('.brand-sub');
+  if (sub) sub.textContent = t('Catatan dan Evaluasi Transaksi');
+  $('#quickAdd').textContent = t('Tambah Trade');
+  document.title = t('Jurnal Trading');
+
+  var sel = $('#langSel');
+  if (sel) {
+    sel.innerHTML = Object.keys(LANGS).map(function (l) {
+      return '<option value="' + l + '"' +
+        (l === getLang() ? ' selected' : '') + '>' + LANGS[l] + '</option>';
+    }).join('');
+    sel.title = t('Bahasa');
   }
 }
 
@@ -1747,7 +1769,13 @@ function estimateSize() {
    INIT
    ========================================================= */
 
+applyStaticTexts();
+
 $('#quickAdd').addEventListener('click', function () { openTradeModal(); });
+
+$('#langSel').addEventListener('change', function () {
+  if (this.value !== getLang()) setLang(this.value);
+});
 
 $('#menuBtn').addEventListener('click', function () {
   $('#sidebar').classList.toggle('open');
